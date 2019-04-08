@@ -1,0 +1,27 @@
+PODS:
+  - analytics-ios-mcvid (0.1.0)
+  - Expecta (1.0.6)
+  - Specta (1.0.7)
+
+DEPENDENCIES:
+  - analytics-ios-mcvid (from `../`)
+  - Expecta
+  - Specta
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - Expecta
+    - Specta
+
+EXTERNAL SOURCES:
+  analytics-ios-mcvid:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  analytics-ios-mcvid: 211260ade8be4f0ae4b3a547ee64b510189ce233
+  Expecta: 3b6bd90a64b9a1dcb0b70aa0e10a7f8f631667d5
+  Specta: 3e1bd89c3517421982dc4d1c992503e48bd5fe66
+
+PODFILE CHECKSUM: 1eae8d46889a91832b53fb4783b76db7b1a95c63
+
+COCOAPODS: 1.5.3

@@ -1,0 +1,14 @@
+use_frameworks!
+
+platform :ios, '8.0'
+
+target 'analytics-ios-mcvid_Example' do
+  pod 'analytics-ios-mcvid', :path => '../'
+
+  target 'analytics-ios-mcvid_Tests' do
+    inherit! :search_paths
+
+    pod 'Specta'
+    pod 'Expecta'
+  end
+end

@@ -1,0 +1,22 @@
+{
+  "name": "analytics-ios-mcvid",
+  "version": "0.1.0",
+  "summary": "A short description of analytics-ios-mcvid.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/Brie/analytics-ios-mcvid",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "Brie": "brienne.mcnally@segment.com"
+  },
+  "source": {
+    "git": "https://github.com/Brie/analytics-ios-mcvid.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "source_files": "analytics-ios-mcvid/Classes/**/*"
+}
