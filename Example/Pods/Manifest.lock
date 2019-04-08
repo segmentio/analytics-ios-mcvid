@@ -18,7 +18,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  analytics-ios-mcvid: 211260ade8be4f0ae4b3a547ee64b510189ce233
+  analytics-ios-mcvid: 87c2df93dcf69a95ade1db4c0cf27f6372aca503
   Expecta: 3b6bd90a64b9a1dcb0b70aa0e10a7f8f631667d5
   Specta: 3e1bd89c3517421982dc4d1c992503e48bd5fe66
 
