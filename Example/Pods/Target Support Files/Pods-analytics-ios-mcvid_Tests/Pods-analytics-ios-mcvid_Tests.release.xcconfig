@@ -1,8 +1,9 @@
-FRAMEWORK_SEARCH_PATHS = $(inherited) $(PLATFORM_DIR)/Developer/Library/Frameworks "${PODS_CONFIGURATION_BUILD_DIR}/Expecta" "${PODS_CONFIGURATION_BUILD_DIR}/Specta" "${PODS_CONFIGURATION_BUILD_DIR}/analytics-ios-mcvid"
+FRAMEWORK_SEARCH_PATHS = $(inherited) $(PLATFORM_DIR)/Developer/Library/Frameworks "$(PLATFORM_DIR)/Developer/Library/Frameworks"
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
-LD_RUNPATH_SEARCH_PATHS = $(inherited) '@executable_path/Frameworks' '@loader_path/Frameworks'
-OTHER_CFLAGS = $(inherited) -iquote "${PODS_CONFIGURATION_BUILD_DIR}/Expecta/Expecta.framework/Headers" -iquote "${PODS_CONFIGURATION_BUILD_DIR}/Specta/Specta.framework/Headers" -iquote "${PODS_CONFIGURATION_BUILD_DIR}/analytics-ios-mcvid/analytics_ios_mcvid.framework/Headers"
-OTHER_LDFLAGS = $(inherited) -framework "Expecta" -framework "Specta"
+HEADER_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/Headers/Public" "${PODS_ROOT}/Headers/Public/Analytics" "${PODS_ROOT}/Headers/Public/Expecta" "${PODS_ROOT}/Headers/Public/Specta" "${PODS_ROOT}/Headers/Public/analytics-ios-mcvid"
+LIBRARY_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/Expecta" "${PODS_CONFIGURATION_BUILD_DIR}/Specta" "${PODS_CONFIGURATION_BUILD_DIR}/Analytics" "${PODS_CONFIGURATION_BUILD_DIR}/analytics-ios-mcvid"
+OTHER_CFLAGS = $(inherited) -isystem "${PODS_ROOT}/Headers/Public" -isystem "${PODS_ROOT}/Headers/Public/Analytics" -isystem "${PODS_ROOT}/Headers/Public/Expecta" -isystem "${PODS_ROOT}/Headers/Public/Specta" -isystem "${PODS_ROOT}/Headers/Public/analytics-ios-mcvid"
+OTHER_LDFLAGS = $(inherited) -ObjC -l"Expecta" -l"Specta" -framework "Foundation" -framework "Security" -framework "XCTest"
 PODS_BUILD_DIR = ${BUILD_DIR}
 PODS_CONFIGURATION_BUILD_DIR = ${PODS_BUILD_DIR}/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)
 PODS_PODFILE_DIR_PATH = ${SRCROOT}/.
