@@ -4,18 +4,9 @@
 
 @implementation SEGMCVIDTracker
 
-+(id<SEGMiddleware> organizationId:(NSString *)organizationId)middleware {
-    initWithOrganizationId:(NSString *)organizationId {
-        self = [super init];
-        if (self) {
-            self.organizationId = organizationId;
-        }
-        return self
-    }
-}
 
 + (id<SEGMiddleware>)middleware {
-     [[SEGMCVIDTracker alloc] init];
+    return [[SEGMCVIDTracker alloc] init];
 }
 
 - (void)sendRequestAdobeExperienceCloud:(NSString *)advertisingId organizationId:(NSString *)organizationId completion:(void (^)(NSString *marketingCloudId, NSError *))completion {
@@ -80,7 +71,7 @@
 {
     SEGIdentifyPayload *identify =(SEGIdentifyPayload *)context.payload;
     NSString *advertisingId = identify.context[@"device"][@"advertistingId"];
-    NSString *organizationId = @"orgID@AdobeOrg"; //Segments Org Id for Testing
+    NSString *organizationId = @"input_orgId@AdobeOrg"; //Currently manually inputing Segment's orgId for testing
 
     if (context.eventType != SEGEventTypeIdentify) {
         next(context);
@@ -99,17 +90,23 @@
 
     [self sendRequestAdobeExperienceCloud:advertisingId organizationId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
       if (marketingCloudId.length) {
-          NSLog(@"This is working!, %@", marketingCloudId);
-        // SEGContext *newContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
-        //     ctx.payload = [[SEGIdentifyPayload alloc] initWithEvent:identify.event
-        //                                               properties:identify.properties
-        //                                                  context:identify.context
-        //                                             integrations:identify.integrations.["Adobe Anlytics"].marketingCloudId ];
-        //
-        //   //somewhere here append marketingCloudId to newContext?????
-        //
-        // }];
-        next(context);
+        NSMutableDictionary *mergedIntegrations = [NSMutableDictionary dictionaryWithCapacity:identify.integrations.count + 1 ];
+        NSDictionary *mcidIntegrations = @{@"Adobe Analytics" : @{ @"marketingCloudId": marketingCloudId } };
+
+        [mergedIntegrations addEntriesFromDictionary:identify.integrations];
+        [mergedIntegrations addEntriesFromDictionary:mcidIntegrations];
+
+        SEGContext *newContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
+            ctx.payload = [[SEGIdentifyPayload alloc] initWithUserId:identify.userId
+                                                      anonymousId:identify.anonymousId
+                                                      traits: identify.traits
+                                                      context:identify.context
+                                                      integrations: mergedIntegrations];
+
+            NSLog(@"Confirmed marketingCloudId in Integrations Object: %@",  ctx.payload.integrations[@"Adobe Analytics"]);
+        }];
+
+        next(newContext);
       }
     }];
 
