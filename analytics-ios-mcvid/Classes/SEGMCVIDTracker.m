@@ -4,10 +4,18 @@
 
 @implementation SEGMCVIDTracker
 
-
-+ (id<SEGMiddleware>)middleware {
-    return [[SEGMCVIDTracker alloc] init];
++ (id<SEGMiddleware>)middlewareWithOrganizationId:(NSString *)organizationId {
+    return [[SEGMCVIDTracker alloc] initWithOrganizationId: organizationId];
 }
+
+-(id)initWithOrganizationId:(NSString *)organizationId
+  {
+    if (self = [super init])
+    {
+      self.organizationId = organizationId;
+    }
+    return self;
+  }
 
 - (void)sendRequestAdobeExperienceCloud:(NSString *)advertisingId organizationId:(NSString *)organizationId completion:(void (^)(NSString *marketingCloudId, NSError *))completion {
     //Variables to build URL for GET request
@@ -18,7 +26,7 @@
     //Defaulted values for request
     NSString *versionKey = @"d_ver"; //d_ver defaults to 2
     NSString *version = @"2"; //d_ver defaults to 2
-    NSString *jsonFormatterKey = @"&d_rtbd";//&d_rtbd and defaults to = json
+    NSString *jsonFormatterKey = @"d_rtbd";//&d_rtbd and defaults to = json
     NSString *jsonFormatter = @"json";//&d_rtbd and defaults to = json
     NSString *regionKey = @"dcs_region"; //dcs_region key defaults to = 6
     NSString *region = @"6"; //dcs_region key defaults to = 6
@@ -37,6 +45,8 @@
 
     if (advertisingId) {
         [queryItems addObject:[NSURLQueryItem queryItemWithName:advertisingIdKey value:[NSString stringWithFormat:@"%@%@%@", deviceTypeKey, separator, advertisingId]]];
+        NSLog(@"queryItems %@", queryItems);
+
     }
 
     [queryItems addObject:[NSURLQueryItem queryItemWithName:versionKey value:version]];
@@ -48,6 +58,7 @@
     NSURL *url = components.URL;
 
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    NSLog(@"URl %@", url);
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:config];
 
@@ -70,17 +81,16 @@
 - (void)context:(SEGContext *_Nonnull)context next:(SEGMiddlewareNext _Nonnull)next
 {
     SEGIdentifyPayload *identify =(SEGIdentifyPayload *)context.payload;
-    NSString *advertisingId = identify.context[@"device"][@"advertistingId"];
-    NSString *organizationId = @"input_orgId@AdobeOrg"; //Currently manually inputing Segment's orgId for testing
+    NSString *advertisingId = @"gnaerjnaergeranvjkes";
+    // identify.context[@"device"][@"advertistingId"];
+    NSString *organizationId = self.organizationId;
 
     if (context.eventType != SEGEventTypeIdentify) {
         next(context);
         return;
     }
 
-    if (![context.payload isKindOfClass:[SEGIdentifyPayload class]]) {
-        next(context);
-        return;
+    if ([context.payload isKindOfClass:[SEGIdentifyPayload class]]) {
     }
 
     if (!organizationId) {
@@ -103,13 +113,13 @@
                                                       context:identify.context
                                                       integrations: mergedIntegrations];
 
-            NSLog(@"Confirmed marketingCloudId in Integrations Object: %@",  ctx.payload.integrations[@"Adobe Analytics"]);
+            NSLog(@"Confirmed marketingCloudId in Integrations Object: %@",  ctx.payload.integrations[@"Adobe Analytics"][@"marketingCloudId"]);
         }];
 
         next(newContext);
+        return;
       }
     }];
-
 }
 
 @end

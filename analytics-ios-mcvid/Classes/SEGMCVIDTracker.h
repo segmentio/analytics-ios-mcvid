@@ -5,7 +5,8 @@
 @interface SEGMCVIDTracker : NSObject <SEGMiddleware>
 
 + (id<SEGMiddleware>)middleware;
-@property (nonatomic) NSString *organizationId;
+-(id)initWithOrganizationId:(NSString *)organizationId;
+@property (nonatomic, strong) NSString *organizationId;
 
 - (void) sendRequestAdobeExperienceCloud:(NSString *)advertiserId organizationId:(NSString *)organizationId completion:(void (^)(NSString *marketingCloudIdKey, NSError *))completion;
 
