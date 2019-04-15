@@ -16,10 +16,10 @@
 {
     // Initialize the analytics client as you would normally.
     // https://segment.com/segment-mobile/sources/ios/settings/keys
-    SEGAnalyticsConfiguration *configuration = [SEGAnalyticsConfiguration configurationWithWriteKey:@"your_write_key"];
+    SEGAnalyticsConfiguration *configuration = [SEGAnalyticsConfiguration configurationWithWriteKey:@"YOUR_WRITE_KEY_HERE"];
 
     // Configure the client with the MCVID middleware.
-    configuration.middlewares = @[ [[SEGMCVIDTracker alloc]  initWithOrganizationId:@"orgID_here"] ];
+    configuration.middlewares = @[ [[SEGMCVIDTracker alloc]  initWithOrganizationId:@"YOUR_ORGID@AdobeOrg"] ];
     configuration.trackApplicationLifecycleEvents = YES; // Enable this to record certain application events automatically!
     configuration.recordScreenViews = YES; // Enable this to record screen views automatically!
     configuration.flushAt = 1; // Flush events to Segment every 1 event

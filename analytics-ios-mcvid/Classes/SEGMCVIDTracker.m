@@ -1,6 +1,23 @@
 #import "SEGMCVIDTracker.h"
 #import <Analytics/SEGAnalyticsUtils.h>
 
+@interface MCVIDAdobeError ()
+
+- (id)initWithCode:(MCVIDAdobeErrorCode)code message:(NSString *)message error:(NSError *)error;
+
+@end
+
+@implementation MCVIDAdobeError
+- (id)initWithCode:(MCVIDAdobeErrorCode)code message:(NSString *)message error:(NSError *)error {
+   self = [super  init];
+   if (self) {
+     _code = code;
+     _message = message;
+     _innerError = error;
+   }
+   return self;
+}
+@end
 
 @implementation SEGMCVIDTracker
 
@@ -38,15 +55,24 @@
     NSString *separator = @"%01";
     NSString *advertisingIdKey = @"d_cid_ic";
 
-    //Values to build URl components and quuery items
+    //Values to build URl components and query items
     NSMutableString *urlString = [NSMutableString stringWithFormat:@"%@://%@%@", protocol, host, path];
     NSURLComponents *components = [NSURLComponents componentsWithString:urlString];
     NSMutableArray *queryItems = [NSMutableArray array];
 
-    if (advertisingId) {
-        [queryItems addObject:[NSURLQueryItem queryItemWithName:advertisingIdKey value:[NSString stringWithFormat:@"%@%@%@", deviceTypeKey, separator, advertisingId]]];
-        NSLog(@"queryItems %@", queryItems);
+    //Error handling variables
+    NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
+    NSString *errorResponseKey = @"error_msg";
+    NSString *invalidMarketingCloudId = @"<null>";
+    NSString *errorDomain = @"Segment-Adobe";
+    NSString *serverErrorDomain = @"Segment-Adobe Server Response";
 
+
+    if (advertisingId) {
+      NSString *encodedAdvertisingValue = [NSString stringWithFormat:@"%@%@%@", deviceTypeKey, separator, advertisingId];
+      //removes %25 html encoding of '%'
+      NSString *normalAdvertisingValue = [encodedAdvertisingValue stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+      [queryItems addObject:[NSURLQueryItem queryItemWithName:advertisingIdKey value:normalAdvertisingValue]];
     }
 
     [queryItems addObject:[NSURLQueryItem queryItemWithName:versionKey value:version]];
@@ -58,21 +84,39 @@
     NSURL *url = components.URL;
 
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-    NSLog(@"URl %@", url);
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:config];
 
     [[session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
 
+      void (^callbackWithCode)(MCVIDAdobeErrorCode code, NSString *message, NSError *error) = ^void(MCVIDAdobeErrorCode code, NSString *message, NSError *error) {
+            MCVIDAdobeError *adobeError = [[MCVIDAdobeError alloc] initWithCode:code message:message error:error];
+            NSError *compositeError = [NSError errorWithDomain:errorDomain code:adobeError.code userInfo:@{MCVIDAdobeErrorKey:adobeError}];
+            completion(nil, compositeError);
+        };
+
+      if (error) {
+        return callbackWithCode(MCVIDAdobeErrorCodeClientFailedRequestError, @"Request Failed", error);
+      }
+
         NSDictionary *dictionary = nil;
         @try {
             dictionary = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
         } @catch (NSException *exception) {
-            // return callBackForError(MCVIDJsonParseError, @"Deserializing the JSON response failed", nil);
+            return callbackWithCode(MCVIDAdobeErrorCodeClientSerializationError, @"Deserializing the JSON response failed", nil);
             return (NSLog(@"error"));
         }
 
+        NSDictionary *errorDictionary = dictionary[errorResponseKey];
+        if (errorDictionary) {
+            NSError *error = [NSError errorWithDomain:serverErrorDomain code:0 userInfo:errorDictionary];
+            return callbackWithCode(MCVIDAdobeErrorCodeServerError, @"Server returned an error", error);
+        }
+
         NSString *marketingCloudId = dictionary[marketingCloudIdKey];
+        if ([marketingCloudId isEqualToString:invalidMarketingCloudId]){
+          marketingCloudId =  nil;
+        }
         completion(marketingCloudId, nil);
     }] resume];
 }
@@ -81,8 +125,7 @@
 - (void)context:(SEGContext *_Nonnull)context next:(SEGMiddlewareNext _Nonnull)next
 {
     SEGIdentifyPayload *identify =(SEGIdentifyPayload *)context.payload;
-    NSString *advertisingId = @"gnaerjnaergeranvjkes";
-    // identify.context[@"device"][@"advertistingId"];
+    NSString *advertisingId = identify.context[@"device"][@"advertistingId"];
     NSString *organizationId = self.organizationId;
 
     if (context.eventType != SEGEventTypeIdentify) {
