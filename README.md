@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/cocoapods/l/analytics-ios-mcvid.svg?style=flat)](https://cocoapods.org/pods/analytics-ios-mcvid)
 [![Platform](https://img.shields.io/cocoapods/p/analytics-ios-mcvid.svg?style=flat)](https://cocoapods.org/pods/analytics-ios-mcvid)
 
-When the middleware is able to retrieve a
+A middleware to inject an Adobe Marketing Cloud Visitor IDs to your identify events. Customer's initialize the middleware with their Adobe Organization ID and DCS Region. A list of DCS Regions can be found [here](https://marketing.adobe.com/resources/help/en_US/aam/dcs-regions.html). The middleware makes a call to Adobe's Experience Cloud ID Service to retrieve the Marketing Cloud ID. Documentation on the HTTP request can be found [here](https://marketing.adobe.com/resources/help/en_US/mcvid/mcvid-direct-integration.html). If there is an advertisingId present on the device we will sync that ID to the Adobe Marketing Cloud ID.
 
 ## Example
 
@@ -23,9 +23,21 @@ pod 'Analytics'
 pod 'analytics-ios-mcvid'
 ```
 
+```obj-c
+#import <analytics-ios-mcvid/SEGMCVIDTracker.h>
+
+// Initialize the configuration as you would normally.
+SEGAnalyticsConfiguration *configuration = [SEGAnalyticsConfiguration configurationWithWriteKey:@"YOUR_WRITE_KEY"];
+
+// Configure the client with the MCVID middleware to attach Adobe 'marketingCloudId' to your 'identify' payload. Initialize the middleware with your Adobe OrganizationId and Adobe Region (ie. dcs_region key).  
+configuration.middlewares = @[ [[SEGMCVIDTracker alloc]  initWithOrganizationId:@"YOUR_ADOBE_ORGID@AdobeOrg" region:@"YOUR_REGION_HERE"] ];
+
+[SEGAnalytics setupWithConfiguration:configuration];
+```
+
 ## Author
 
-Brie, brienne.mcnally@segment.com
+Segment.io, Inc., friends@segment.com
 
 ## License
 
