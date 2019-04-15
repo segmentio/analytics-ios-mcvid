@@ -135,7 +135,9 @@
         return;
     }
 
-    if ([context.payload isKindOfClass:[SEGIdentifyPayload class]]) {
+    if (![context.payload isKindOfClass:[SEGIdentifyPayload class]]) {
+      next(context);
+      return;
     }
 
     if (!organizationId) {
