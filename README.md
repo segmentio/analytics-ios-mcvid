@@ -5,6 +5,8 @@
 [![License](https://img.shields.io/cocoapods/l/analytics-ios-mcvid.svg?style=flat)](https://cocoapods.org/pods/analytics-ios-mcvid)
 [![Platform](https://img.shields.io/cocoapods/p/analytics-ios-mcvid.svg?style=flat)](https://cocoapods.org/pods/analytics-ios-mcvid)
 
+When the middleware is able to retrieve a
+
 ## Example
 
 To run the example project, clone the repo, and run `pod install` from the Example directory first.
@@ -13,10 +15,11 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 
 ## Installation
 
-analytics-ios-mcvid is available through [CocoaPods](https://cocoapods.org). To install
+analytics-ios-mcvid is available through [CocoaPods](https://cocoapods.org). This pod requires version 3.6.0 or higher of the `Analytics` pod. To install
 it, simply add the following line to your Podfile:
 
 ```ruby
+pod 'Analytics'
 pod 'analytics-ios-mcvid'
 ```
 
