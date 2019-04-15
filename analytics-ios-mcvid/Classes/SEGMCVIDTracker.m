@@ -159,10 +159,7 @@
                                                       traits: identify.traits
                                                       context:identify.context
                                                       integrations: mergedIntegrations];
-
-            NSLog(@"Confirmed marketingCloudId in Integrations Object: %@",  ctx.payload.integrations[@"Adobe Analytics"][@"marketingCloudId"]);
-        }];
-
+                                                    }];
         next(newContext);
         return;
       }

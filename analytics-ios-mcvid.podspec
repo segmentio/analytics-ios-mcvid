@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'analytics-ios-mcvid'
-  s.version          = '0.1.0'
+  s.version          = '1.0.0'
   s.summary          = 'Append marketingCloudId to identify calls with analytics-ios-mcvid.'
 
 # This description is used to generate tags and improve search results.
@@ -22,21 +22,14 @@ Analytics-ios-mcvid requests the marketingCloudId from Adobe and appends it to i
                        DESC
 
   s.homepage         = 'https://github.com/segmentio/analytics-ios-mcvid.git'
-  # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'briemcnally' => 'brienne.mcnally@segment.com' }
   s.source           = { :git => 'https://github.com/segmentio/analytics-ios-mcvid.git', :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
+  s.social_media_url = 'https://twitter.com/SegmentEng'
 
   s.ios.deployment_target = '8.0'
 
   s.source_files = 'analytics-ios-mcvid/Classes/**/*'
 
-  # s.resource_bundles = {
-  #   'analytics-ios-mcvid' => ['analytics-ios-mcvid/Assets/*.png']
-  # }
-
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
   s.dependency 'Analytics', '~> 3.6.0'
 end
