@@ -5,12 +5,13 @@
 @interface SEGMCVIDTracker : NSObject <SEGMiddleware>
 
 + (id<SEGMiddleware>)middleware;
--(id)initWithOrganizationId:(NSString *)organizationId;
+-(id)initWithOrganizationId:(NSString *)organizationId region:(NSString *)region;
+
 @property (nonatomic, strong) NSString *organizationId;
+@property (nonatomic, strong) NSString *region;
+@property(readonly, copy) NSString *stringByRemovingPercentEncoding;
 
 - (void) sendRequestAdobeExperienceCloud:(NSString *)advertiserId organizationId:(NSString *)organizationId completion:(void (^)(NSString *marketingCloudIdKey, NSError *))completion;
-- (NSString *)stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)encoding;
-
 
 @end
 

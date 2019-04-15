@@ -21,15 +21,16 @@
 
 @implementation SEGMCVIDTracker
 
-+ (id<SEGMiddleware>)middlewareWithOrganizationId:(NSString *)organizationId {
-    return [[SEGMCVIDTracker alloc] initWithOrganizationId: organizationId];
++ (id<SEGMiddleware>)middlewareWithOrganizationId:(NSString *)organizationId region:(NSString *)region {
+    return [[SEGMCVIDTracker alloc] initWithOrganizationId: organizationId region:region ];
 }
 
--(id)initWithOrganizationId:(NSString *)organizationId
+-(id)initWithOrganizationId:(NSString *)organizationId region:(NSString *)region
   {
     if (self = [super init])
     {
       self.organizationId = organizationId;
+      self.region = region;
     }
     return self;
   }
@@ -46,7 +47,7 @@
     NSString *jsonFormatterKey = @"d_rtbd";//&d_rtbd and defaults to = json
     NSString *jsonFormatter = @"json";//&d_rtbd and defaults to = json
     NSString *regionKey = @"dcs_region"; //dcs_region key defaults to = 6
-    NSString *region = @"6"; //dcs_region key defaults to = 6
+    NSString *region = _region; //dcs_region
     NSString *marketingCloudIdKey = @"d_mid";
     NSString *organizationIdKey = @"d_orgid"; //can retrieve from settings
 
@@ -82,6 +83,7 @@
 
     components.queryItems = queryItems;
     NSURL *url = components.URL;
+    NSLog(@"URL, %@", url);
 
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
@@ -126,7 +128,7 @@
 {
     SEGIdentifyPayload *identify =(SEGIdentifyPayload *)context.payload;
     NSString *advertisingId = identify.context[@"device"][@"advertistingId"];
-    NSString *organizationId = self.organizationId;
+    NSString *organizationId = _organizationId;
 
     if (context.eventType != SEGEventTypeIdentify) {
         next(context);
