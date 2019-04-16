@@ -16,9 +16,9 @@
 {
     // Initialize the analytics client as you would normally.
     // https://segment.com/segment-mobile/sources/ios/settings/keys
-    SEGAnalyticsConfiguration *configuration = [SEGAnalyticsConfiguration configurationWithWriteKey:@"YOUR_WRITE_KEY_HERE"];
+    SEGAnalyticsConfiguration *configuration = [SEGAnalyticsConfiguration configurationWithWriteKey:@"YOUR_WRITE_KEY"];
 
-    // Configure the client with the MCVID middleware. Intiliaze with your Adobe OrgId and Adobe Region (ie. dcs_region key) 
+    // Configure the client with the MCVID middleware. Intiliaze with your Adobe OrgId and Adobe Region (ie. dcs_region key)
     configuration.middlewares = @[ [[SEGMCVIDTracker alloc]  initWithOrganizationId:@"YOUR_ADOBE_ORGID@AdobeOrg" region:@"YOUR_REGION_HERE"] ];
     configuration.trackApplicationLifecycleEvents = YES; // Enable this to record certain application events automatically!
     configuration.recordScreenViews = YES; // Enable this to record screen views automatically!
@@ -28,6 +28,10 @@
     // Override point for customization after application launch.
     [[SEGAnalytics sharedAnalytics] identify:@"user12345"
                                traits:@{ @"email": @"test@test.com" }];
+
+   [[SEGAnalytics sharedAnalytics] track:@"Item Purchased"
+                              properties:@{ @"item": @"Sword of Heracles", @"revenue": @2.95 }];
+
 
     [[SEGAnalytics sharedAnalytics] identify:@"Testing Adobe Analytics"];
 
