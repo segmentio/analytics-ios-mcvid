@@ -126,44 +126,90 @@
 
 - (void)context:(SEGContext *_Nonnull)context next:(SEGMiddlewareNext _Nonnull)next
 {
-    SEGIdentifyPayload *identify =(SEGIdentifyPayload *)context.payload;
-    NSString *advertisingId = identify.context[@"device"][@"advertistingId"];
-    NSString *organizationId = _organizationId;
+  if ([context.payload isKindOfClass:[SEGAliasPayload class]]) {
+    next(context);
+    return;
+  }
+  NSString *organizationId = _organizationId;
+  NSString *advertisingId = nil;
+  SEGIdentifyPayload *identify =(SEGIdentifyPayload *)context.payload;
+  SEGTrackPayload *track =(SEGTrackPayload *)context.payload;
+  SEGScreenPayload *screen =(SEGScreenPayload *)context.payload;
+  SEGGroupPayload *group =(SEGGroupPayload *)context.payload;
 
-    if (context.eventType != SEGEventTypeIdentify) {
-        next(context);
-        return;
-    }
-
-    if (![context.payload isKindOfClass:[SEGIdentifyPayload class]]) {
+  if (!organizationId) {
       next(context);
       return;
-    }
+  }
 
-    if (!organizationId) {
-        next(context);
-        return;
-    }
+  if ([context.payload isKindOfClass:[SEGIdentifyPayload class]]){
+    advertisingId = identify.context[@"device"][@"advertistingId"];
+  }
 
-    [self sendRequestAdobeExperienceCloud:advertisingId organizationId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
-      if (marketingCloudId.length) {
-        NSMutableDictionary *mergedIntegrations = [NSMutableDictionary dictionaryWithCapacity:identify.integrations.count + 1 ];
-        NSDictionary *mcidIntegrations = @{@"Adobe Analytics" : @{ @"marketingCloudId": marketingCloudId } };
+  if ([context.payload isKindOfClass:[SEGTrackPayload class]]){
+    advertisingId = track.context[@"device"][@"advertistingId"];
+  }
 
-        [mergedIntegrations addEntriesFromDictionary:identify.integrations];
-        [mergedIntegrations addEntriesFromDictionary:mcidIntegrations];
+  if ([context.payload isKindOfClass:[SEGScreenPayload class]]){
+    advertisingId = screen.context[@"device"][@"advertistingId"];
+  }
 
-        SEGContext *newContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
+  if ([context.payload isKindOfClass:[SEGGroupPayload class]]){
+    advertisingId = group.context[@"device"][@"advertistingId"];
+  }
+
+  [self sendRequestAdobeExperienceCloud:advertisingId organizationId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
+    if (marketingCloudId.length) {
+      NSMutableDictionary *mergedIntegrations = [NSMutableDictionary dictionaryWithCapacity:track.integrations.count + 1 ];
+      NSDictionary *mcidIntegrations = @{@"Adobe Analytics" : @{ @"marketingCloudVisitorId": marketingCloudId } };
+
+      [mergedIntegrations addEntriesFromDictionary:track.integrations];
+      [mergedIntegrations addEntriesFromDictionary:mcidIntegrations];
+
+      if ([context.payload isKindOfClass:[SEGIdentifyPayload class]]){
+        SEGContext *newIdentifyContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
             ctx.payload = [[SEGIdentifyPayload alloc] initWithUserId:identify.userId
                                                       anonymousId:identify.anonymousId
                                                       traits: identify.traits
                                                       context:identify.context
                                                       integrations: mergedIntegrations];
                                                     }];
-        next(newContext);
-        return;
+        next(newIdentifyContext);
       }
-    }];
+
+      if ([context.payload isKindOfClass:[SEGTrackPayload class]]){
+        SEGContext *newTrackContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
+            ctx.payload = [[SEGTrackPayload alloc] initWithEvent:track.event
+                                                      properties:track.properties
+                                                      context:track.context
+                                                      integrations: mergedIntegrations];
+                                                    }];
+        next(newTrackContext);
+      }
+
+      if ([context.payload isKindOfClass:[SEGScreenPayload class]]){
+        SEGContext *newScreenContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
+            ctx.payload = [[SEGScreenPayload alloc] initWithName:screen.name
+                                                    properties:screen.properties
+                                                    context:identify.context
+                                                    integrations: mergedIntegrations];
+                                                  }];
+        next(newScreenContext);
+      }
+
+      if ([context.payload isKindOfClass:[SEGGroupPayload class]]){
+        SEGContext *newGroupContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
+            ctx.payload = [[SEGGroupPayload alloc] initWithGroupId:group.groupId
+                                                    traits: group.traits
+                                                    context:group.context
+                                                    integrations: mergedIntegrations];
+                                                  }];
+        next(newGroupContext);
+      }
+
+      return;
+    }
+  }];
 }
 
 @end
