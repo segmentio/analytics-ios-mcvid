@@ -157,8 +157,12 @@
   if ([context.payload isKindOfClass:[SEGGroupPayload class]]){
     advertisingId = group.context[@"device"][@"advertistingId"];
   }
+  __block NSString *staticMarketingCloudId =@"";
 
   [self sendRequestAdobeExperienceCloud:advertisingId organizationId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
+    __block NSString *staticMarketingCloudId = marketingCloudId;
+    NSLog(@"works %@", staticMarketingCloudId);
+
     if (marketingCloudId.length) {
       NSMutableDictionary *mergedIntegrations = [NSMutableDictionary dictionaryWithCapacity:track.integrations.count + 1 ];
       NSDictionary *mcidIntegrations = @{@"Adobe Analytics" : @{ @"marketingCloudVisitorId": marketingCloudId } };
@@ -207,7 +211,7 @@
         next(newGroupContext);
       }
 
-      return;
+     return;
     }
   }];
 }
