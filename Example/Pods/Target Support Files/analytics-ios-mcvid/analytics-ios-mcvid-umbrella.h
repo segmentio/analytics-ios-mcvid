@@ -10,6 +10,7 @@
 #endif
 #endif
 
+#import "SEGMCVIDTracker.h"
 
 FOUNDATION_EXPORT double analytics_ios_mcvidVersionNumber;
 FOUNDATION_EXPORT const unsigned char analytics_ios_mcvidVersionString[];

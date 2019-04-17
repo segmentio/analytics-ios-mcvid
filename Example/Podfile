@@ -1,9 +1,11 @@
-use_frameworks!
+# use_frameworks!
 
 platform :ios, '8.0'
 
 target 'analytics-ios-mcvid_Example' do
   pod 'analytics-ios-mcvid', :path => '../'
+  pod "Analytics", "3.6.10"
+
 
   target 'analytics-ios-mcvid_Tests' do
     inherit! :search_paths
