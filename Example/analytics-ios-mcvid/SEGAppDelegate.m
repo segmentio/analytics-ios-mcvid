@@ -29,9 +29,12 @@
     [[SEGAnalytics sharedAnalytics] identify:@"user12345"
                                traits:@{ @"email": @"test@test.com" }];
 
+    [NSThread sleepForTimeInterval:5.0f];
+
    [[SEGAnalytics sharedAnalytics] track:@"Item Purchased"
                               properties:@{ @"item": @"Sword of Heracles", @"revenue": @2.95 }];
 
+    [NSThread sleepForTimeInterval:5.0f];
 
     [[SEGAnalytics sharedAnalytics] identify:@"Testing Adobe Analytics"];
 

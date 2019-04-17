@@ -116,9 +116,7 @@
         }
 
         NSString *marketingCloudId = dictionary[marketingCloudIdKey];
-        //This shows staticMarketingCloudId as a number
-        self.staticMarketingCloudId = marketingCloudId;
-        NSLog(@"In request fxn %@", self.staticMarketingCloudId);
+
         if ([marketingCloudId isEqualToString:invalidMarketingCloudId]){
           marketingCloudId =  nil;
         }
@@ -135,10 +133,10 @@
   }
   NSString *organizationId = _organizationId;
   NSString *advertisingId = nil;
-  SEGIdentifyPayload *identify =(SEGIdentifyPayload *)context.payload;
-  SEGTrackPayload *track =(SEGTrackPayload *)context.payload;
-  SEGScreenPayload *screen =(SEGScreenPayload *)context.payload;
-  SEGGroupPayload *group =(SEGGroupPayload *)context.payload;
+   SEGIdentifyPayload *identify =(SEGIdentifyPayload *)context.payload;
+   SEGTrackPayload *track =(SEGTrackPayload *)context.payload;
+   SEGScreenPayload *screen =(SEGScreenPayload *)context.payload;
+   SEGGroupPayload *group =(SEGGroupPayload *)context.payload;
 
   if (!organizationId) {
       next(context);
@@ -147,6 +145,7 @@
 
   if ([context.payload isKindOfClass:[SEGIdentifyPayload class]]){
     advertisingId = identify.context[@"device"][@"advertistingId"];
+
   }
 
   if ([context.payload isKindOfClass:[SEGTrackPayload class]]){
@@ -160,67 +159,65 @@
   if ([context.payload isKindOfClass:[SEGGroupPayload class]]){
     advertisingId = group.context[@"device"][@"advertistingId"];
   }
-  //This shows staticMarketingCloudId as null
-  //I need access to it here so I can check if it is present to decide whether or not to send a request
-  //In this scope it is never being updated or cached it is always null 
-  NSLog(@"Before fxn %@", self.staticMarketingCloudId);
 
-  [self sendRequestAdobeExperienceCloud:advertisingId organizationId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
-    //This shows staticMarketingCloudId as a number
-    self.staticMarketingCloudId = marketingCloudId;
-    NSLog(@"In request %@", self.staticMarketingCloudId);
+  if (!self.staticMarketingCloudId) {
+    [self sendRequestAdobeExperienceCloud:advertisingId organizationId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
+      self.staticMarketingCloudId = marketingCloudId;
+    }];
+  }
 
-    if (marketingCloudId.length) {
-      NSMutableDictionary *mergedIntegrations = [NSMutableDictionary dictionaryWithCapacity:track.integrations.count + 1 ];
-      NSDictionary *mcidIntegrations = @{@"Adobe Analytics" : @{ @"marketingCloudVisitorId": marketingCloudId } };
+  if (self.staticMarketingCloudId.length) {
+    NSMutableDictionary *mergedIntegrations = [NSMutableDictionary dictionaryWithCapacity:(identify.integrations.count || track.integrations.count || screen.integrations.count || group.integrations.count) + 1 ];
+    NSDictionary *mcidIntegrations = @{@"Adobe Analytics" : @{ @"marketingCloudVisitorId": self.staticMarketingCloudId } };
+    [mergedIntegrations addEntriesFromDictionary:mcidIntegrations];
 
-      [mergedIntegrations addEntriesFromDictionary:track.integrations];
-      [mergedIntegrations addEntriesFromDictionary:mcidIntegrations];
-
-      if ([context.payload isKindOfClass:[SEGIdentifyPayload class]]){
-        SEGContext *newIdentifyContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
-            ctx.payload = [[SEGIdentifyPayload alloc] initWithUserId:identify.userId
-                                                      anonymousId:identify.anonymousId
-                                                      traits: identify.traits
-                                                      context:identify.context
-                                                      integrations: mergedIntegrations];
-                                                    }];
-        next(newIdentifyContext);
-      }
-
-      if ([context.payload isKindOfClass:[SEGTrackPayload class]]){
-        SEGContext *newTrackContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
-            ctx.payload = [[SEGTrackPayload alloc] initWithEvent:track.event
-                                                      properties:track.properties
-                                                      context:track.context
-                                                      integrations: mergedIntegrations];
-                                                    }];
-        next(newTrackContext);
-      }
-
-      if ([context.payload isKindOfClass:[SEGScreenPayload class]]){
-        SEGContext *newScreenContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
-            ctx.payload = [[SEGScreenPayload alloc] initWithName:screen.name
-                                                    properties:screen.properties
+    if ([context.payload isKindOfClass:[SEGIdentifyPayload class]]){
+      [mergedIntegrations addEntriesFromDictionary:identify.integrations];
+      SEGContext *newIdentifyContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
+          ctx.payload = [[SEGIdentifyPayload alloc] initWithUserId:identify.userId
+                                                    anonymousId:identify.anonymousId
+                                                    traits: identify.traits
                                                     context:identify.context
                                                     integrations: mergedIntegrations];
                                                   }];
-        next(newScreenContext);
-      }
+      next(newIdentifyContext);
+    }
 
-      if ([context.payload isKindOfClass:[SEGGroupPayload class]]){
-        SEGContext *newGroupContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
-            ctx.payload = [[SEGGroupPayload alloc] initWithGroupId:group.groupId
-                                                    traits: group.traits
-                                                    context:group.context
+    if ([context.payload isKindOfClass:[SEGTrackPayload class]]){
+      [mergedIntegrations addEntriesFromDictionary:track.integrations];
+      SEGContext *newTrackContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
+          ctx.payload = [[SEGTrackPayload alloc] initWithEvent:track.event
+                                                    properties:track.properties
+                                                    context:track.context
                                                     integrations: mergedIntegrations];
                                                   }];
-        next(newGroupContext);
-      }
-
-     return;
+      next(newTrackContext);
     }
-  }];
+
+    if ([context.payload isKindOfClass:[SEGScreenPayload class]]){
+      [mergedIntegrations addEntriesFromDictionary:screen.integrations];
+      SEGContext *newScreenContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
+          ctx.payload = [[SEGScreenPayload alloc] initWithName:screen.name
+                                                  properties:screen.properties
+                                                  context:screen.context
+                                                  integrations: mergedIntegrations];
+                                                }];
+      next(newScreenContext);
+    }
+
+    if ([context.payload isKindOfClass:[SEGGroupPayload class]]){
+      [mergedIntegrations addEntriesFromDictionary:group.integrations];
+      SEGContext *newGroupContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
+          ctx.payload = [[SEGGroupPayload alloc] initWithGroupId:group.groupId
+                                                  traits: group.traits
+                                                  context:group.context
+                                                  integrations: mergedIntegrations];
+                                                }];
+      next(newGroupContext);
+    }
+
+   return;
+  }
 }
 
 @end
