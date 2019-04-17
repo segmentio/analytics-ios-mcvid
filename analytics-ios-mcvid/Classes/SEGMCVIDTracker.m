@@ -160,7 +160,7 @@
   __block NSString *staticMarketingCloudId =@"";
 
   [self sendRequestAdobeExperienceCloud:advertisingId organizationId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
-    __block NSString *staticMarketingCloudId = marketingCloudId;
+    staticMarketingCloudId = marketingCloudId;
     NSLog(@"works %@", staticMarketingCloudId);
 
     if (marketingCloudId.length) {
