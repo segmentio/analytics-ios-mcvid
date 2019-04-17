@@ -117,8 +117,8 @@
 
         NSString *marketingCloudId = dictionary[marketingCloudIdKey];
         //This shows staticMarketingCloudId as a number
-        _staticMarketingCloudId = marketingCloudId;
-        NSLog(@"In request fxn %@", _staticMarketingCloudId);
+        self.staticMarketingCloudId = marketingCloudId;
+        NSLog(@"In request fxn %@", self.staticMarketingCloudId);
         if ([marketingCloudId isEqualToString:invalidMarketingCloudId]){
           marketingCloudId =  nil;
         }
@@ -163,12 +163,12 @@
   //This shows staticMarketingCloudId as null
   //I need access to it here so I can check if it is present to decide whether or not to send a request
   //In this scope it is never being updated or cached it is always null 
-  NSLog(@"Before fxn %@", _staticMarketingCloudId);
+  NSLog(@"Before fxn %@", self.staticMarketingCloudId);
 
   [self sendRequestAdobeExperienceCloud:advertisingId organizationId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
     //This shows staticMarketingCloudId as a number
-    _staticMarketingCloudId = marketingCloudId;
-    NSLog(@"In request %@", _staticMarketingCloudId);
+    self.staticMarketingCloudId = marketingCloudId;
+    NSLog(@"In request %@", self.staticMarketingCloudId);
 
     if (marketingCloudId.length) {
       NSMutableDictionary *mergedIntegrations = [NSMutableDictionary dictionaryWithCapacity:track.integrations.count + 1 ];
