@@ -1,8 +1,8 @@
 {
   "name": "analytics-ios-mcvid",
-  "version": "0.1.0",
-  "summary": "A short description of analytics-ios-mcvid.",
-  "description": "TODO: Add long description of the pod here.",
+  "version": "1.0.0",
+  "summary": "Append marketingCloudId to identify calls with analytics-ios-mcvid.",
+  "description": "Analytics-ios-mcvid requests the marketingCloudId from Adobe and appends it to identify calls in the integration specific object.",
   "homepage": "https://github.com/segmentio/analytics-ios-mcvid.git",
   "license": {
     "type": "MIT",
@@ -13,10 +13,15 @@
   },
   "source": {
     "git": "https://github.com/segmentio/analytics-ios-mcvid.git",
-    "tag": "0.1.0"
+    "tag": "1.0.0"
   },
   "platforms": {
     "ios": "8.0"
   },
-  "source_files": "analytics-ios-mcvid/Classes/**/*"
+  "source_files": "analytics-ios-mcvid/Classes/**/*",
+  "dependencies": {
+    "Analytics": [
+      "~> 3.6.0"
+    ]
+  }
 }
