@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/cocoapods/l/analytics-ios-mcvid.svg?style=flat)](https://cocoapods.org/pods/analytics-ios-mcvid)
 [![Platform](https://img.shields.io/cocoapods/p/analytics-ios-mcvid.svg?style=flat)](https://cocoapods.org/pods/analytics-ios-mcvid)
 
-A middleware to inject an Adobe Marketing Cloud Visitor IDs to your identify events. Customer's initialize the middleware with their Adobe Organization ID and DCS Region. A list of DCS Regions can be found [here](https://marketing.adobe.com/resources/help/en_US/aam/dcs-regions.html). The middleware makes a call to Adobe's Experience Cloud ID Service to retrieve the Marketing Cloud ID. Documentation on the HTTP request can be found [here](https://marketing.adobe.com/resources/help/en_US/mcvid/mcvid-direct-integration.html). If there is an advertisingId present on the device we will sync that ID to the Adobe Marketing Cloud ID.
+A middleware to inject an Adobe Marketing Cloud Visitor IDs to your Segment events. Initialize the middleware with your Adobe Organization ID and DCS Region. A list of DCS Regions can be found [here](https://marketing.adobe.com/resources/help/en_US/aam/dcs-regions.html). The middleware makes a call to Adobe's Experience Cloud ID Service to retrieve the Marketing Cloud ID. Documentation on the HTTP request can be found [here](https://marketing.adobe.com/resources/help/en_US/mcvid/mcvid-direct-integration.html). If there is an advertisingId present on the device we will sync that ID to the Adobe Marketing Cloud ID. The Adobe Marketing Cloud ID will then be appending to your `identify`, `track`, `screen`, and `group` calls in the integration specific object.
 
 ## Example
 
