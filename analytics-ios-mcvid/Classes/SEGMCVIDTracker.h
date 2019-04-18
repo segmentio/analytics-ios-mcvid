@@ -4,7 +4,6 @@
 
 @interface SEGMCVIDTracker : NSObject <SEGMiddleware>
 
-+ (id<SEGMiddleware>)middleware;
 -(id)initWithOrganizationId:(NSString *)organizationId region:(NSString *)region;
 
 @property (nonatomic, strong) NSString *organizationId;

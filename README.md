@@ -1,6 +1,6 @@
 # analytics-ios-mcvid
 
-[![CI Status](https://img.shields.io/travis/Brie/analytics-ios-mcvid.svg?style=flat)](https://travis-ci.org/Brie/analytics-ios-mcvid)
+[![Circle CI](https://circleci.com/gh/segmentio/analytics-ios-mcvid.svg?style=svg&circle-token=c1ada4f11670fcda29d6305a26f1c6a760ef8856)](https://circleci.com/gh/segmentio/analytics-ios-mcvid)
 [![Version](https://img.shields.io/cocoapods/v/analytics-ios-mcvid.svg?style=flat)](https://cocoapods.org/pods/analytics-ios-mcvid)
 [![License](https://img.shields.io/cocoapods/l/analytics-ios-mcvid.svg?style=flat)](https://cocoapods.org/pods/analytics-ios-mcvid)
 [![Platform](https://img.shields.io/cocoapods/p/analytics-ios-mcvid.svg?style=flat)](https://cocoapods.org/pods/analytics-ios-mcvid)
