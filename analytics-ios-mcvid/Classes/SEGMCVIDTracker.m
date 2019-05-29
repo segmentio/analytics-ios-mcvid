@@ -161,9 +161,12 @@
   }
 
   if (!self.staticMarketingCloudId) {
+    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
     [self sendRequestAdobeExperienceCloud:advertisingId organizationId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
       self.staticMarketingCloudId = marketingCloudId;
+      dispatch_semaphore_signal(sema);
     }];
+    dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
   }
 
   if (self.staticMarketingCloudId.length) {
