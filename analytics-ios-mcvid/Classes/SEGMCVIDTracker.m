@@ -145,7 +145,6 @@
 
   if ([context.payload isKindOfClass:[SEGIdentifyPayload class]]){
     advertisingId = identify.context[@"device"][@"advertistingId"];
-
   }
 
   if ([context.payload isKindOfClass:[SEGTrackPayload class]]){
@@ -153,12 +152,17 @@
   }
 
   if ([context.payload isKindOfClass:[SEGScreenPayload class]]){
-    advertisingId = screen.context[@"device"][@"advertistingId"];
+    advertisingId =  screen.context[@"device"][@"advertistingId"];
   }
 
   if ([context.payload isKindOfClass:[SEGGroupPayload class]]){
     advertisingId = group.context[@"device"][@"advertistingId"];
   }
+
+  if (!advertisingId){
+      advertisingId = SEGIDFA();
+  }
+
 
   if (!self.staticMarketingCloudId) {
     dispatch_semaphore_t sema = dispatch_semaphore_create(0);
