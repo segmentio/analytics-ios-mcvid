@@ -10,8 +10,12 @@
 @property (nonatomic, strong) NSString *region;
 @property(readonly, copy) NSString *stringByRemovingPercentEncoding;
 @property(nonatomic, strong) NSString *staticMarketingCloudId;
+@property(nonatomic) NSString *cachedAdvertisingId;
+@property(nonatomic) NSString *cachedMarketingCloudId;
 
-- (void) sendRequestAdobeExperienceCloud:(NSString *)advertiserId organizationId:(NSString *)organizationId completion:(void (^)(NSString *marketingCloudIdKey, NSError *))completion;
+
+- (void) getMarketingCloudId:(NSString *)organizationId completion:(void (^)(NSString *marketingCloudId, NSError *))completion;
+- (void) syncMarketingCloudId:(NSString *)advertisingId organizationId:(NSString *)organizationId marketingCloudId:(NSString *)marketingCloudId completion:(void (^)(NSError *))completion;
 
 @end
 
