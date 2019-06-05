@@ -1,5 +1,8 @@
 #import "SEGMCVIDTracker.h"
 #import <Analytics/SEGAnalyticsUtils.h>
+#import <AdSupport/ASIdentifierManager.h>
+
+
 
 @interface MCVIDAdobeError ()
 
@@ -36,26 +39,33 @@
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *cachedMarketingCloudId = [defaults stringForKey:@"MarketingCloudId"];
     NSString *cachedAdvertisingId = [defaults stringForKey:@"AdvertisingId"];
+    [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
+    //This is was SEGIDFA() is going under the hood. NSString *idfaString = [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
+    NSString *segIdfa = SEGIDFA();
 
-    if (!cachedMarketingCloudId || (cachedAdvertisingId != SEGIDFA())) {
+    NSLog(@"cachedMarketingCloudId %@", cachedMarketingCloudId);
+    NSLog(@"cachedAdvertisingId %@", cachedAdvertisingId);
+
+    if (!cachedMarketingCloudId || (cachedAdvertisingId != segIdfa)) {
       NSString *advertisingId = SEGIDFA();
       [defaults setObject:advertisingId forKey:@"AdvertisingId"];
       dispatch_semaphore_t sema = dispatch_semaphore_create(0);
         [self getMarketingCloudId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
           [defaults setObject:marketingCloudId forKey:@"MarketingCloudId"];
-        }];
-
-        [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId marketingCloudId:cachedMarketingCloudId completion:^(NSError *error) {
           dispatch_semaphore_signal(sema);
+          [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId marketingCloudId:cachedMarketingCloudId completion:^(NSError *error) {
+            dispatch_semaphore_signal(sema); //unsure if this is necessary
+          }];
         }];
       dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
-    } else if (cachedMarketingCloudId && (cachedAdvertisingId == SEGIDFA()) && cachedAdvertisingId) {
+    } else if (cachedMarketingCloudId && (cachedAdvertisingId == segIdfa) && cachedAdvertisingId) {
       dispatch_semaphore_t sema = dispatch_semaphore_create(0);
       [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId marketingCloudId:cachedMarketingCloudId completion:^(NSError *error) {
         dispatch_semaphore_signal(sema);
       }];
       dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
     }
+    [defaults synchronize];
     return self;
   }
 
