@@ -35,7 +35,6 @@
 
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *cachedMarketingCloudId = [defaults stringForKey:@"MarketingCloudId"];
-    [defaults setObject:advertisingId forKey:@"AdvertisingId"];
     NSString *cachedAdvertisingId = [defaults stringForKey:@"AdvertisingId"];
 
     if (!cachedMarketingCloudId || (cachedAdvertisingId != SEGIDFA())) {
