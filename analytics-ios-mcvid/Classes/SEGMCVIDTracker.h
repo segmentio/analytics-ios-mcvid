@@ -1,7 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <Analytics/SEGMiddleware.h>
 
-
 @interface SEGMCVIDTracker : NSObject <SEGMiddleware>
 
 -(id)initWithOrganizationId:(NSString *)organizationId region:(NSString *)region;
@@ -14,7 +13,7 @@
 @property(nonatomic) NSString *cachedMarketingCloudId;
 
 
-- (void) getMarketingCloudId:(NSString *)organizationId completion:(void (^)(NSString *marketingCloudId, NSError *))completion;
++ (void) getMarketingCloudId:(NSString *)organizationId completion:(void (^)(NSString *marketingCloudId, NSError *))completion;
 - (void) syncMarketingCloudId:(NSString *)advertisingId organizationId:(NSString *)organizationId marketingCloudId:(NSString *)marketingCloudId completion:(void (^)(NSError *))completion;
 
 @end

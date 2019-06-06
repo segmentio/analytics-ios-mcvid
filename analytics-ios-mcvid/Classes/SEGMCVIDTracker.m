@@ -112,15 +112,15 @@
 
     [[session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
 
-      void (^callbackWithCode)(MCVIDAdobeErrorCode code, NSString *message, NSError *error) = ^void(MCVIDAdobeErrorCode code, NSString *message, NSError *error) {
+        void (^callbackWithCode)(MCVIDAdobeErrorCode code, NSString *message, NSError *error) = ^void(MCVIDAdobeErrorCode code, NSString *message, NSError *error) {
             MCVIDAdobeError *adobeError = [[MCVIDAdobeError alloc] initWithCode:code message:message error:error];
             NSError *compositeError = [NSError errorWithDomain:errorDomain code:adobeError.code userInfo:@{MCVIDAdobeErrorKey:adobeError}];
             completion(nil, compositeError);
         };
 
-      if (error) {
-        return callbackWithCode(MCVIDAdobeErrorCodeClientFailedRequestError, @"Request Failed", error);
-      }
+        if (error) {
+            return callbackWithCode(MCVIDAdobeErrorCodeClientFailedRequestError, @"Request Failed", error);
+        }
 
         NSDictionary *dictionary = nil;
         @try {
@@ -137,9 +137,26 @@
         }
 
         NSString *marketingCloudId = dictionary[marketingCloudIdKey];
+        NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
+        NSInteger responseStatusCode = [httpResponse statusCode];
 
-        if ([marketingCloudId isEqualToString:invalidMarketingCloudId]){
-          marketingCloudId =  nil;
+        if ((responseStatusCode != 200) || ([marketingCloudId isEqualToString:invalidMarketingCloudId])){
+           dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 10);
+           dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+               [self getMarketingCloudId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
+                   NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
+                   NSInteger newResponseStatusCode = [httpResponse statusCode];
+                   NSLog(@"This is the reponse statusCode within the dispatch %lu", newResponseStatusCode);
+                   if (newResponseStatusCode == 200) {
+//                       NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+//                       [defaults setObject:marketingCloudId forKey:@"MarketingCloudId"];
+//                       NSLog(@"this is  the new cached MCVID %@", marketingCloudId);
+//                       NSLog(@"this is  the new cached MCVID %@", ([defaults stringForKey:@"MarketingCloudId"]));
+                       completion(marketingCloudId, nil);
+                       return;
+                   }
+               }];
+           });
         }
         completion(marketingCloudId, nil);
     }] resume];
