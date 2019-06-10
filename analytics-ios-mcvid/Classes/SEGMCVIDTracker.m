@@ -1,6 +1,8 @@
 #import "SEGMCVIDTracker.h"
 #import <Analytics/SEGAnalyticsUtils.h>
 #import <AdSupport/ASIdentifierManager.h>
+#include <time.h>
+#include <stdlib.h>
 
 
 
@@ -138,8 +140,11 @@
 
         NSString *marketingCloudId = dictionary[marketingCloudIdKey];
         NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
-        __block NSInteger responseStatusCode = 400;
-//        [httpResponse statusCode];
+        __block NSInteger responseStatusCode = [httpResponse statusCode];
+        srand(time(NULL));
+        int r = rand() % 2;
+        responseStatusCode = (r == 0) ? 200 : 400;
+        
 
         if ((responseStatusCode != 200) || ([marketingCloudId isEqualToString:invalidMarketingCloudId])){
            dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 10);
@@ -156,9 +161,9 @@
                    }];
                 }
             });
-               
+        } else {
+            completion(marketingCloudId, nil);
         }
-          completion(marketingCloudId, nil);
     }] resume];
 }
 
