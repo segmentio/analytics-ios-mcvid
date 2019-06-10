@@ -31,14 +31,3 @@ workflows:
   build_and_test:
     jobs:
       - build_and_test
-  scheduled_e2e_test:
-    triggers:
-      - schedule:
-          cron: "30 * * * *"
-          filters:
-            branches:
-              only:
-                - master
-                - scheduled_e2e_testing
-    jobs:
-      - build_and_test
