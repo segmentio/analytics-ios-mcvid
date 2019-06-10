@@ -138,27 +138,27 @@
 
         NSString *marketingCloudId = dictionary[marketingCloudIdKey];
         NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
-        NSInteger responseStatusCode = [httpResponse statusCode];
+        __block NSInteger responseStatusCode = 400;
+//        [httpResponse statusCode];
 
         if ((responseStatusCode != 200) || ([marketingCloudId isEqualToString:invalidMarketingCloudId])){
            dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 10);
            dispatch_after(delay, dispatch_get_main_queue(), ^(void){
-               [self getMarketingCloudId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
-                   NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
-                   NSInteger newResponseStatusCode = [httpResponse statusCode];
-                   NSLog(@"This is the reponse statusCode within the dispatch %lu", newResponseStatusCode);
-                   if (newResponseStatusCode == 200) {
-//                       NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-//                       [defaults setObject:marketingCloudId forKey:@"MarketingCloudId"];
-//                       NSLog(@"this is  the new cached MCVID %@", marketingCloudId);
-//                       NSLog(@"this is  the new cached MCVID %@", ([defaults stringForKey:@"MarketingCloudId"]));
-                       completion(marketingCloudId, nil);
-                       return;
-                   }
-               }];
-           });
+               if (responseStatusCode != 200) {
+                   NSLog(@"This is the reponse statusCode before the dispatch %lu", responseStatusCode);
+                   [self getMarketingCloudId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
+                       NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
+                       responseStatusCode = [httpResponse statusCode];
+                       NSLog(@"This is the reponse statusCode within the dispatch %lu", responseStatusCode);
+                       if (responseStatusCode == 200) {
+                           completion(marketingCloudId, nil);
+                       }
+                   }];
+                }
+            });
+               
         }
-        completion(marketingCloudId, nil);
+          completion(marketingCloudId, nil);
     }] resume];
 }
 
