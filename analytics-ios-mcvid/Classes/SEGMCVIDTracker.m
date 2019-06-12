@@ -44,76 +44,54 @@
     [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     //This is was SEGIDFA() is going under the hood. NSString *idfaString = [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     NSString *segIdfa = SEGIDFA();
-
+    NSUInteger maxRetryCount = 10;
+    NSUInteger maxRetryTime = 300;
+    if (cachedAdvertisingId != segIdfa) {
+        [defaults setObject:segIdfa forKey:@"AdvertisingId"];
+    }
     NSLog(@"cachedMarketingCloudId %@", cachedMarketingCloudId);
     NSLog(@"cachedAdvertisingId %@", cachedAdvertisingId);
+    NSLog(@"cached segidfa %@", segIdfa);
 
-    if (!cachedMarketingCloudId || (cachedAdvertisingId != segIdfa)) {
-      NSString *advertisingId = SEGIDFA();
-      [defaults setObject:advertisingId forKey:@"AdvertisingId"];
-      dispatch_semaphore_t sema = dispatch_semaphore_create(0);
-        [self getMarketingCloudId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
+    if ((cachedMarketingCloudId.length == 0) || (cachedAdvertisingId != segIdfa)) {
+        [self getMarketingCloudId:organizationId maxRetryCount:maxRetryCount maxRetryTime:maxRetryTime completion:^(NSString *marketingCloudId, NSError *error) {
           [defaults setObject:marketingCloudId forKey:@"MarketingCloudId"];
-          dispatch_semaphore_signal(sema);
           [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId marketingCloudId:cachedMarketingCloudId completion:^(NSError *error) {
-            dispatch_semaphore_signal(sema); //unsure if this is necessary
+              if (error) {
+                  return;
+              }
           }];
         }];
-      dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
-    } else if (cachedMarketingCloudId && (cachedAdvertisingId == segIdfa) && cachedAdvertisingId) {
-      dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+    } else if (cachedMarketingCloudId.length != 0) {
       [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId marketingCloudId:cachedMarketingCloudId completion:^(NSError *error) {
-        dispatch_semaphore_signal(sema);
+          if (error) {
+              return;
+          }
       }];
-      dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
     }
     [defaults synchronize];
     return self;
   }
 
-- (void)getMarketingCloudId:(NSString *)organizationId completion:(void (^)(NSString *marketingCloudId, NSError *))completion {
-    //Variables to build URL for GET request
-    NSString *protocol = @"https";
-    NSString *host = @"dpm.demdex.net";
-    NSString *path = @"/id?";
-
-    //Defaulted values for request
-    NSString *versionKey = @"d_ver"; //d_ver defaults to 2
-    NSString *version = @"2"; //d_ver defaults to 2
-    NSString *jsonFormatterKey = @"d_rtbd";//&d_rtbd and defaults to = json
-    NSString *jsonFormatter = @"json";//&d_rtbd and defaults to = json
-    NSString *regionKey = @"dcs_region"; //dcs_region key defaults to = 6
-    NSString *region = _region; //dcs_region
-    NSString *marketingCloudIdKey = @"d_mid";
-    NSString *organizationIdKey = @"d_orgid"; //can retrieve from settings
-
-    //Values to build URl components and query items
-    NSMutableString *urlString = [NSMutableString stringWithFormat:@"%@://%@%@", protocol, host, path];
-    NSURLComponents *components = [NSURLComponents componentsWithString:urlString];
-    NSMutableArray *queryItems = [NSMutableArray array];
-
+- (void)getMarketingCloudId:(NSString *)organizationId maxRetryCount:(NSUInteger)maxRetryCount maxRetryTime:(NSUInteger)maxRetryTime completion:(void (^)(NSString *marketingCloudId, NSError *))completion {
     //Error handling variables
     NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
     NSString *errorResponseKey = @"error_msg";
     NSString *invalidMarketingCloudId = @"<null>";
     NSString *errorDomain = @"Segment-Adobe";
     NSString *serverErrorDomain = @"Segment-Adobe Server Response";
+    NSString *marketingCloudIdKey = @"d_mid";
 
-    [queryItems addObject:[NSURLQueryItem queryItemWithName:versionKey value:version]];
-    [queryItems addObject:[NSURLQueryItem queryItemWithName:jsonFormatterKey value:jsonFormatter]];
-    [queryItems addObject:[NSURLQueryItem queryItemWithName:regionKey value:region]];
-    [queryItems addObject:[NSURLQueryItem queryItemWithName:organizationIdKey value:organizationId]];
+    NSString *marketingCloud = nil;
+    NSString *advertisingId = nil;
 
-    components.queryItems = queryItems;
-    NSURL *url = components.URL;
+    NSURL *url = [self createURL:advertisingId organizationId:organizationId marketingCloudId:marketingCloud];
     NSLog(@"URL, %@", url);
-
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:config];
 
     [[session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-
         void (^callbackWithCode)(MCVIDAdobeErrorCode code, NSString *message, NSError *error) = ^void(MCVIDAdobeErrorCode code, NSString *message, NSError *error) {
             MCVIDAdobeError *adobeError = [[MCVIDAdobeError alloc] initWithCode:code message:message error:error];
             NSError *compositeError = [NSError errorWithDomain:errorDomain code:adobeError.code userInfo:@{MCVIDAdobeErrorKey:adobeError}];
@@ -129,7 +107,6 @@
             dictionary = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
         } @catch (NSException *exception) {
             return callbackWithCode(MCVIDAdobeErrorCodeClientSerializationError, @"Deserializing the JSON response failed", nil);
-            return (NSLog(@"error"));
         }
 
         NSDictionary *errorDictionary = dictionary[errorResponseKey];
@@ -140,27 +117,20 @@
 
         NSString *marketingCloudId = dictionary[marketingCloudIdKey];
         NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
-        __block NSInteger responseStatusCode = [httpResponse statusCode];
-        srand(time(NULL));
-        int r = rand() % 2;
-        responseStatusCode = (r == 0) ? 200 : 400;
-        
+        __block NSInteger responseStatusCode = 400;
+//        [httpResponse statusCode];
 
-        if ((responseStatusCode != 200) || ([marketingCloudId isEqualToString:invalidMarketingCloudId])){
-           dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 10);
-           dispatch_after(delay, dispatch_get_main_queue(), ^(void){
-               if (responseStatusCode != 200) {
-                   NSLog(@"This is the reponse statusCode before the dispatch %lu", responseStatusCode);
-                   [self getMarketingCloudId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
-                       NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
-                       responseStatusCode = [httpResponse statusCode];
-                       NSLog(@"This is the reponse statusCode within the dispatch %lu", responseStatusCode);
-                       if (responseStatusCode == 200) {
-                           completion(marketingCloudId, nil);
-                       }
-                   }];
-                }
+        if (((responseStatusCode != 200) || ([marketingCloudId isEqualToString:invalidMarketingCloudId])) && ( maxRetryCount > 0)){
+           dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 1);
+           NSUInteger newRetryCount = maxRetryCount - 1;
+//           NSLog(@"new retry count %lu", newRetryCount);
+            self.backgroundQueue = dispatch_queue_create("com.exmaple.MyCustomQueueu", NULL);
+            dispatch_after(delay, self.backgroundQueue, ^(void){
+               [self getMarketingCloudId:organizationId maxRetryCount:newRetryCount maxRetryTime:maxRetryTime completion:^(NSString *marketingCloudId, NSError *error) {
+               }];
             });
+        } else if (((responseStatusCode != 200) || ([marketingCloudId isEqualToString:invalidMarketingCloudId])) && ( maxRetryCount == 0)) {
+            completion(nil, nil);
         } else {
             completion(marketingCloudId, nil);
         }
@@ -168,51 +138,14 @@
 }
 
 - (void)syncMarketingCloudId:(NSString *)advertisingId organizationId:(NSString *)organizationId marketingCloudId:(NSString *)marketingCloudId completion:(void (^)(NSError *))completion {
-    //Variables to build URL for GET request
-    NSString *protocol = @"https";
-    NSString *host = @"dpm.demdex.net";
-    NSString *path = @"/id?";
-
-    //Defaulted values for request
-    NSString *versionKey = @"d_ver"; //d_ver defaults to 2
-    NSString *version = @"2"; //d_ver defaults to 2
-    NSString *jsonFormatterKey = @"d_rtbd";//&d_rtbd and defaults to = json
-    NSString *jsonFormatter = @"json";//&d_rtbd and defaults to = json
-    NSString *regionKey = @"dcs_region"; //dcs_region key defaults to = 6
-    NSString *region = _region; //dcs_region
-    NSString *marketingCloudIdKey = @"d_mid";
-    NSString *organizationIdKey = @"d_orgid"; //can retrieve from settings
-
-    //Variables for when advertising Id is present
-    NSString *deviceTypeKey = @"DSID_20915";//means ios
-    NSString *separator = @"%01";
-    NSString *advertisingIdKey = @"d_cid_ic";
-
-    //Values to build URl components and query items
-    NSMutableString *urlString = [NSMutableString stringWithFormat:@"%@://%@%@", protocol, host, path];
-    NSURLComponents *components = [NSURLComponents componentsWithString:urlString];
-    NSMutableArray *queryItems = [NSMutableArray array];
-
     //Error handling variables
     NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
     NSString *errorResponseKey = @"error_msg";
     NSString *errorDomain = @"Segment-Adobe";
     NSString *serverErrorDomain = @"Segment-Adobe Server Response";
 
-    NSString *encodedAdvertisingValue = [NSString stringWithFormat:@"%@%@%@", deviceTypeKey, separator, advertisingId];
-    //removes %25 html encoding of '%'
-    NSString *normalAdvertisingValue = [encodedAdvertisingValue stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    [queryItems addObject:[NSURLQueryItem queryItemWithName:advertisingIdKey value:normalAdvertisingValue]];
-
-    [queryItems addObject:[NSURLQueryItem queryItemWithName:versionKey value:version]];
-    [queryItems addObject:[NSURLQueryItem queryItemWithName:jsonFormatterKey value:jsonFormatter]];
-    [queryItems addObject:[NSURLQueryItem queryItemWithName:regionKey value:region]];
-    [queryItems addObject:[NSURLQueryItem queryItemWithName:organizationIdKey value:organizationId]];
-    [queryItems addObject:[NSURLQueryItem queryItemWithName:marketingCloudIdKey value:marketingCloudId]];
-
-    components.queryItems = queryItems;
-    NSURL *url = components.URL;
-    NSLog(@"URL, %@", url);
+    NSURL *url = [self createURL:advertisingId organizationId:organizationId marketingCloudId:marketingCloudId];
+    NSLog(@"URl %@", url);
 
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
@@ -248,25 +181,69 @@
     }] resume];
 }
 
+- (NSURL *)createURL:advertisingId organizationId:(NSString *)organizationId marketingCloudId:(NSString *)marketingCloudId {
+    //Variables to build URL for GET request
+    NSString *protocol = @"https";
+    NSString *host = @"dpm.demdex.net";
+    NSString *path = @"/id?";
 
-- (void)context:(SEGContext *_Nonnull)context next:(SEGMiddlewareNext _Nonnull)next
-{
-  if ([context.payload isKindOfClass:[SEGAliasPayload class]]) {
-    next(context);
-    return;
-  }
+    //Defaulted values for request
+    NSString *versionKey = @"d_ver"; //d_ver defaults to 2
+    NSString *version = @"2"; //d_ver defaults to 2
+    NSString *jsonFormatterKey = @"d_rtbd";//&d_rtbd and defaults to = json
+    NSString *jsonFormatter = @"json";//&d_rtbd and defaults to = json
+    NSString *regionKey = @"dcs_region"; //dcs_region key defaults to = 6
+    NSString *region = _region; //dcs_region
+    NSString *marketingCloudIdKey = @"d_mid";
+    NSString *organizationIdKey = @"d_orgid"; //can retrieve from settings
+
+    //Variables for when advertising Id is present
+    NSString *deviceTypeKey = @"DSID_20915";//means ios
+    NSString *separator = @"%01";
+    NSString *advertisingIdKey = @"d_cid_ic";
+
+    //Values to build URl components and query items
+    NSMutableString *urlString = [NSMutableString stringWithFormat:@"%@://%@%@", protocol, host, path];
+    NSURLComponents *components = [NSURLComponents componentsWithString:urlString];
+    NSMutableArray *queryItems = [NSMutableArray array];
+
+    [queryItems addObject:[NSURLQueryItem queryItemWithName:versionKey value:version]];
+    [queryItems addObject:[NSURLQueryItem queryItemWithName:jsonFormatterKey value:jsonFormatter]];
+    [queryItems addObject:[NSURLQueryItem queryItemWithName:regionKey value:region]];
+    [queryItems addObject:[NSURLQueryItem queryItemWithName:organizationIdKey value:organizationId]];
+    if (marketingCloudId) {
+        [queryItems addObject:[NSURLQueryItem queryItemWithName:marketingCloudIdKey value:marketingCloudId]];
+        NSString *encodedAdvertisingValue = [NSString stringWithFormat:@"%@%@%@", deviceTypeKey, separator, advertisingId];
+        //removes %25 html encoding of '%'
+        NSString *normalAdvertisingValue = [encodedAdvertisingValue stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        [queryItems addObject:[NSURLQueryItem queryItemWithName:advertisingIdKey value:normalAdvertisingValue]];
+    }
+    components.queryItems = queryItems;
+    NSURL *url = components.URL;
+    NSLog(@"URL, %@", url);
+
+    return url;
+}
+
+
+- (void)context:(SEGContext *_Nonnull)context next:(SEGMiddlewareNext _Nonnull)next {
+    if ([context.payload isKindOfClass:[SEGAliasPayload class]]) {
+      next(context);
+      return;
+    }
 
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   NSString *cachedMarketingCloudId = [defaults stringForKey:@"MarketingCloudId"];
+
   if (!cachedMarketingCloudId) {
     next(context);
     return;
   }
 
- if (!_organizationId) {
+  if (!_organizationId) {
      next(context);
      return;
- }
+  }
 
   SEGIdentifyPayload *identify =(SEGIdentifyPayload *)context.payload;
   SEGTrackPayload *track =(SEGTrackPayload *)context.payload;
@@ -323,11 +300,6 @@
                                                 }];
       next(newGroupContext);
     }
-    return;
-  }
-
-  if (!cachedMarketingCloudId) {
-      next(context);
     return;
   }
 }
