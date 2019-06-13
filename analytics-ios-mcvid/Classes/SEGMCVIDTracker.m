@@ -54,7 +54,7 @@
         [defaults setObject:segIdfa forKey:@"AdvertisingId"];
     }
 
-    if ((cachedMarketingCloudId.length == 0) || (cachedAdvertisingId != segIdfa)) {
+    if (cachedMarketingCloudId.length == 0) {
         [self getMarketingCloudId:organizationId maxRetryCount:maxRetryCount currentRetryCount:currentRetryCount maxRetryTimeSecs:maxRetryTimeSecs completion:^(NSString *marketingCloudId, NSError *error) {
           [defaults setObject:marketingCloudId forKey:@"MarketingCloudId"];
           [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId marketingCloudId:cachedMarketingCloudId maxRetryCount:maxRetryCount currentRetryCount:currentRetryCount maxRetryTimeSecs:maxRetryTimeSecs completion:^(NSError *error) {
@@ -75,11 +75,11 @@
   }
 
 - (void)getMarketingCloudId:(NSString *)organizationId maxRetryCount:(NSUInteger)maxRetryCount currentRetryCount:(NSUInteger)currentRetryCount maxRetryTimeSecs:(NSUInteger)maxRetryTimeSecs completion:(void (^)(NSString *marketingCloudId, NSError *))completion {
-    //Error handling variables
+    
+    //Response and error handling variables
     NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
-    NSString *errorResponseKey = @"error_msg";
+    NSString *errorResponseKey = @"errors";
     NSString *errorDomain = @"Segment-Adobe";
-    NSString *serverErrorDomain = @"Segment-Adobe Server Response";
     NSString *marketingCloudIdKey = @"d_mid";
 
     NSString *marketingCloud = nil;
@@ -96,45 +96,42 @@
             NSError *compositeError = [NSError errorWithDomain:errorDomain code:adobeError.code userInfo:@{MCVIDAdobeErrorKey:adobeError}];
             completion(nil, compositeError);
         };
-
-        if (error) {
-            return callbackWithCode(MCVIDAdobeErrorCodeClientFailedRequestError, @"Request Failed", error);
-        }
-
+        
         NSDictionary *dictionary = nil;
         @try {
             dictionary = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
         } @catch (NSException *exception) {
             return callbackWithCode(MCVIDAdobeErrorCodeClientSerializationError, @"Deserializing the JSON response failed", nil);
         }
-
-        NSDictionary *errorDictionary = dictionary[errorResponseKey];
-        if (errorDictionary) {
-            NSError *error = [NSError errorWithDomain:serverErrorDomain code:0 userInfo:errorDictionary];
-            return callbackWithCode(MCVIDAdobeErrorCodeServerError, @"Server returned an error", error);
-        }
-
+        
         NSString *marketingCloudId = dictionary[marketingCloudIdKey];
+
+        
+        // or { ..., "errors": [{ "code": 2, "msg": "error" } ... ], ... }
+        NSDictionary *errorDictionary = dictionary[errorResponseKey];
+        NSError *errorObject = dictionary[errorResponseKey][0];
+        NSString *errorMessage = dictionary[@"errors"][0][@"msg"];
+        
         NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
         NSInteger responseStatusCode = [httpResponse statusCode];
+        
+        //Logic for exponential backoff algorithm
         NSUInteger milliSecondsToWait = currentRetryCount * currentRetryCount;
         NSUInteger milliSecondsWaited = currentRetryCount * (currentRetryCount + 1)  * ((2 * currentRetryCount) + 1)/6;
 
-        if (currentRetryCount > maxRetryCount) {
-          completion(nil, nil);
-            return;
+        if ((currentRetryCount > maxRetryCount) && errorObject) {
+            return callbackWithCode(MCVIDAdobeErrorCodeServerError, errorMessage, errorObject);
         }
 
-        if (milliSecondsWaited / 1 >= maxRetryTimeSecs) {
-            completion(nil, nil);
-            return;
+        if ((milliSecondsWaited / 1 >= maxRetryTimeSecs) && errorObject) {
+            return callbackWithCode(MCVIDAdobeErrorCodeServerError, errorMessage, errorObject);
         }
 
-        if (responseStatusCode == 200){
+        if (responseStatusCode == 200 && (!errorObject) ){
             completion(marketingCloudId, nil);
         } else {
             dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * milliSecondsToWait);
-            self.backgroundQueue = dispatch_queue_create("com.exmaple.MyCustomQueueu", NULL);
+            self.backgroundQueue = dispatch_queue_create("com.exmaple.MyCustomQueue", NULL);
             dispatch_after(delay, self.backgroundQueue, ^(void){
                 [self getMarketingCloudId:organizationId maxRetryCount:maxRetryCount currentRetryCount:currentRetryCount+1 maxRetryTimeSecs:maxRetryTimeSecs completion:^(NSString *marketingCloudId, NSError *error) {
                 }];
@@ -144,11 +141,11 @@
 }
 
 - (void)syncMarketingCloudId:(NSString *)advertisingId organizationId:(NSString *)organizationId marketingCloudId:(NSString *)marketingCloudId maxRetryCount:(NSUInteger)maxRetryCount currentRetryCount:(NSUInteger)currentRetryCount maxRetryTimeSecs:(NSUInteger)maxRetryTimeSecs completion:(void (^)(NSError *))completion {
-    //Error handling variables
+    
+    //Response and error handling variables
     NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
-    NSString *errorResponseKey = @"error_msg";
+    NSString *errorResponseKey = @"errors";
     NSString *errorDomain = @"Segment-Adobe";
-    NSString *serverErrorDomain = @"Segment-Adobe Server Response";
 
     NSURL *url = [self createURL:advertisingId organizationId:organizationId marketingCloudId:marketingCloudId];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
@@ -156,16 +153,12 @@
     NSURLSession *session = [NSURLSession sessionWithConfiguration:config];
 
     [[session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-
-      void (^callbackWithCode)(MCVIDAdobeErrorCode code, NSString *message, NSError *error) = ^void(MCVIDAdobeErrorCode code, NSString *message, NSError *error) {
+        void (^callbackWithCode)(MCVIDAdobeErrorCode code, NSString *message, NSError *error) = ^void(MCVIDAdobeErrorCode code, NSString *message, NSError *error) {
             MCVIDAdobeError *adobeError = [[MCVIDAdobeError alloc] initWithCode:code message:message error:error];
             NSError *compositeError = [NSError errorWithDomain:errorDomain code:adobeError.code userInfo:@{MCVIDAdobeErrorKey:adobeError}];
             completion(compositeError);
         };
 
-      if (error) {
-        return callbackWithCode(MCVIDAdobeErrorCodeClientFailedRequestError, @"Request Failed", error);
-      }
 
         NSDictionary *dictionary = nil;
         @try {
@@ -173,29 +166,28 @@
         } @catch (NSException *exception) {
             return callbackWithCode(MCVIDAdobeErrorCodeClientSerializationError, @"Deserializing the JSON response failed", nil);
         }
-
+        
+        // or { ..., "errors": [{ "code": 2, "msg": "error" } ... ], ... }
         NSDictionary *errorDictionary = dictionary[errorResponseKey];
-        if (errorDictionary) {
-            NSError *error = [NSError errorWithDomain:serverErrorDomain code:0 userInfo:errorDictionary];
-            return callbackWithCode(MCVIDAdobeErrorCodeServerError, @"Server returned an error", error);
-        }
+        NSError *errorObject = dictionary[errorResponseKey][0];
+        NSString *errorMessage = dictionary[@"errors"][0][@"msg"];
+        
 
         NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
         NSInteger responseStatusCode = [httpResponse statusCode];
         NSUInteger milliSecondsToWait = currentRetryCount * currentRetryCount;
         NSUInteger milliSecondsWaited = currentRetryCount * (currentRetryCount + 1)  * ((2 * currentRetryCount) + 1)/6;
         
-        if (currentRetryCount > maxRetryCount) {
-            completion(nil);
-            return;
+        if ((currentRetryCount > maxRetryCount) && (errorObject)) {
+            return callbackWithCode(MCVIDAdobeErrorCodeServerError, errorMessage, errorObject);
+
         }
         
-        if (milliSecondsWaited / 1 >= maxRetryTimeSecs) {
-            completion(nil);
-            return;
+        if (milliSecondsWaited / 1 >= maxRetryTimeSecs && (errorObject)) {
+            return callbackWithCode(MCVIDAdobeErrorCodeServerError, errorMessage, errorObject);
         }
         
-        if (responseStatusCode == 200){
+        if ((responseStatusCode == 200) && (!errorObject)){
             completion(nil);
         } else {
             dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * milliSecondsToWait);
