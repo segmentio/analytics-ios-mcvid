@@ -38,32 +38,33 @@
       self.region = region;
     }
 
+    //Values for exponential backoff retry logic for API calls
+    NSUInteger maxRetryCount = 11;
+    NSUInteger currentRetryCount = 1;
+    NSUInteger maxRetryTimeSecs = 300;
+
+    //Store advertisingId and marketingCloudId on local storage
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *cachedMarketingCloudId = [defaults stringForKey:@"MarketingCloudId"];
     NSString *cachedAdvertisingId = [defaults stringForKey:@"AdvertisingId"];
     [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     //This is was SEGIDFA() is going under the hood. NSString *idfaString = [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     NSString *segIdfa = SEGIDFA();
-    NSUInteger maxRetryCount = 10;
-    NSUInteger maxRetryTime = 300;
-    if (cachedAdvertisingId != segIdfa) {
+    if (![cachedAdvertisingId isEqualToString:segIdfa]) {
         [defaults setObject:segIdfa forKey:@"AdvertisingId"];
     }
-    NSLog(@"cachedMarketingCloudId %@", cachedMarketingCloudId);
-    NSLog(@"cachedAdvertisingId %@", cachedAdvertisingId);
-    NSLog(@"cached segidfa %@", segIdfa);
 
     if ((cachedMarketingCloudId.length == 0) || (cachedAdvertisingId != segIdfa)) {
-        [self getMarketingCloudId:organizationId maxRetryCount:maxRetryCount maxRetryTime:maxRetryTime completion:^(NSString *marketingCloudId, NSError *error) {
+        [self getMarketingCloudId:organizationId maxRetryCount:maxRetryCount currentRetryCount:currentRetryCount maxRetryTimeSecs:maxRetryTimeSecs completion:^(NSString *marketingCloudId, NSError *error) {
           [defaults setObject:marketingCloudId forKey:@"MarketingCloudId"];
-          [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId marketingCloudId:cachedMarketingCloudId completion:^(NSError *error) {
+          [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId marketingCloudId:cachedMarketingCloudId maxRetryCount:maxRetryCount currentRetryCount:currentRetryCount maxRetryTimeSecs:maxRetryTimeSecs completion:^(NSError *error) {
               if (error) {
                   return;
               }
           }];
         }];
     } else if (cachedMarketingCloudId.length != 0) {
-      [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId marketingCloudId:cachedMarketingCloudId completion:^(NSError *error) {
+      [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId marketingCloudId:cachedMarketingCloudId maxRetryCount:maxRetryCount currentRetryCount:currentRetryCount maxRetryTimeSecs:maxRetryTimeSecs completion:^(NSError *error) {
           if (error) {
               return;
           }
@@ -73,11 +74,10 @@
     return self;
   }
 
-- (void)getMarketingCloudId:(NSString *)organizationId maxRetryCount:(NSUInteger)maxRetryCount maxRetryTime:(NSUInteger)maxRetryTime completion:(void (^)(NSString *marketingCloudId, NSError *))completion {
+- (void)getMarketingCloudId:(NSString *)organizationId maxRetryCount:(NSUInteger)maxRetryCount currentRetryCount:(NSUInteger)currentRetryCount maxRetryTimeSecs:(NSUInteger)maxRetryTimeSecs completion:(void (^)(NSString *marketingCloudId, NSError *))completion {
     //Error handling variables
     NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
     NSString *errorResponseKey = @"error_msg";
-    NSString *invalidMarketingCloudId = @"<null>";
     NSString *errorDomain = @"Segment-Adobe";
     NSString *serverErrorDomain = @"Segment-Adobe Server Response";
     NSString *marketingCloudIdKey = @"d_mid";
@@ -86,7 +86,6 @@
     NSString *advertisingId = nil;
 
     NSURL *url = [self createURL:advertisingId organizationId:organizationId marketingCloudId:marketingCloud];
-    NSLog(@"URL, %@", url);
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:config];
@@ -117,27 +116,34 @@
 
         NSString *marketingCloudId = dictionary[marketingCloudIdKey];
         NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
-        __block NSInteger responseStatusCode = 400;
-//        [httpResponse statusCode];
+        NSInteger responseStatusCode = [httpResponse statusCode];
+        NSUInteger milliSecondsToWait = currentRetryCount * currentRetryCount;
+        NSUInteger milliSecondsWaited = currentRetryCount * (currentRetryCount + 1)  * ((2 * currentRetryCount) + 1)/6;
 
-        if (((responseStatusCode != 200) || ([marketingCloudId isEqualToString:invalidMarketingCloudId])) && ( maxRetryCount > 0)){
-           dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 1);
-           NSUInteger newRetryCount = maxRetryCount - 1;
-//           NSLog(@"new retry count %lu", newRetryCount);
+        if (currentRetryCount > maxRetryCount) {
+          completion(nil, nil);
+            return;
+        }
+
+        if (milliSecondsWaited / 1 >= maxRetryTimeSecs) {
+            completion(nil, nil);
+            return;
+        }
+
+        if (responseStatusCode == 200){
+            completion(marketingCloudId, nil);
+        } else {
+            dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * milliSecondsToWait);
             self.backgroundQueue = dispatch_queue_create("com.exmaple.MyCustomQueueu", NULL);
             dispatch_after(delay, self.backgroundQueue, ^(void){
-               [self getMarketingCloudId:organizationId maxRetryCount:newRetryCount maxRetryTime:maxRetryTime completion:^(NSString *marketingCloudId, NSError *error) {
-               }];
+                [self getMarketingCloudId:organizationId maxRetryCount:maxRetryCount currentRetryCount:currentRetryCount+1 maxRetryTimeSecs:maxRetryTimeSecs completion:^(NSString *marketingCloudId, NSError *error) {
+                }];
             });
-        } else if (((responseStatusCode != 200) || ([marketingCloudId isEqualToString:invalidMarketingCloudId])) && ( maxRetryCount == 0)) {
-            completion(nil, nil);
-        } else {
-            completion(marketingCloudId, nil);
         }
     }] resume];
 }
 
-- (void)syncMarketingCloudId:(NSString *)advertisingId organizationId:(NSString *)organizationId marketingCloudId:(NSString *)marketingCloudId completion:(void (^)(NSError *))completion {
+- (void)syncMarketingCloudId:(NSString *)advertisingId organizationId:(NSString *)organizationId marketingCloudId:(NSString *)marketingCloudId maxRetryCount:(NSUInteger)maxRetryCount currentRetryCount:(NSUInteger)currentRetryCount maxRetryTimeSecs:(NSUInteger)maxRetryTimeSecs completion:(void (^)(NSError *))completion {
     //Error handling variables
     NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
     NSString *errorResponseKey = @"error_msg";
@@ -145,8 +151,6 @@
     NSString *serverErrorDomain = @"Segment-Adobe Server Response";
 
     NSURL *url = [self createURL:advertisingId organizationId:organizationId marketingCloudId:marketingCloudId];
-    NSLog(@"URl %@", url);
-
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:config];
@@ -168,7 +172,6 @@
             dictionary = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
         } @catch (NSException *exception) {
             return callbackWithCode(MCVIDAdobeErrorCodeClientSerializationError, @"Deserializing the JSON response failed", nil);
-            return (NSLog(@"error"));
         }
 
         NSDictionary *errorDictionary = dictionary[errorResponseKey];
@@ -177,7 +180,31 @@
             return callbackWithCode(MCVIDAdobeErrorCodeServerError, @"Server returned an error", error);
         }
 
-        completion(nil);
+        NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
+        NSInteger responseStatusCode = [httpResponse statusCode];
+        NSUInteger milliSecondsToWait = currentRetryCount * currentRetryCount;
+        NSUInteger milliSecondsWaited = currentRetryCount * (currentRetryCount + 1)  * ((2 * currentRetryCount) + 1)/6;
+        
+        if (currentRetryCount > maxRetryCount) {
+            completion(nil);
+            return;
+        }
+        
+        if (milliSecondsWaited / 1 >= maxRetryTimeSecs) {
+            completion(nil);
+            return;
+        }
+        
+        if (responseStatusCode == 200){
+            completion(nil);
+        } else {
+            dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * milliSecondsToWait);
+            self.backgroundQueue = dispatch_queue_create("com.exmaple.MyCustomQueueu", NULL);
+            dispatch_after(delay, self.backgroundQueue, ^(void){
+                [self syncMarketingCloudId:advertisingId organizationId:organizationId marketingCloudId:marketingCloudId maxRetryCount:maxRetryCount currentRetryCount:currentRetryCount+1 maxRetryTimeSecs:maxRetryTimeSecs completion:^(NSError *error){
+                }];
+            });
+        }
     }] resume];
 }
 
@@ -220,8 +247,7 @@
     }
     components.queryItems = queryItems;
     NSURL *url = components.URL;
-    NSLog(@"URL, %@", url);
-
+    
     return url;
 }
 
@@ -253,7 +279,6 @@
   if (cachedMarketingCloudId.length) {
     NSMutableDictionary *mergedIntegrations = [NSMutableDictionary dictionaryWithCapacity:100];
     NSDictionary *mcidIntegrations = @{@"Adobe Analytics" : @{ @"marketingCloudVisitorId": cachedMarketingCloudId } };
-    NSLog(@"mcidIntegrations %@", mcidIntegrations);
     [mergedIntegrations addEntriesFromDictionary:mcidIntegrations];
 
     if ([context.payload isKindOfClass:[SEGIdentifyPayload class]]){
@@ -265,6 +290,7 @@
                                                     context:identify.context
                                                     integrations: mergedIntegrations];
                                                   }];
+
       next(newIdentifyContext);
     }
 

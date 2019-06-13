@@ -11,14 +11,13 @@
 @property(nonatomic, strong) NSString *staticMarketingCloudId;
 @property(nonatomic) NSString *cachedAdvertisingId;
 @property(nonatomic) NSString *cachedMarketingCloudId;
-@property(nonatomic) NSInteger *maxRetryCount;
-@property(nonatomic) NSInteger *maxRetryTime;
+@property(nonatomic) NSUInteger *maxRetryCount;
+@property(nonatomic) NSUInteger *currentRetryCount;
+@property(nonatomic) NSUInteger *maxRetryTimeSecs;
 @property dispatch_queue_t backgroundQueue;
 
-
-
-+ (void) getMarketingCloudId:(NSString *)organizationId maxRetryCount:(NSUInteger)maxRetryCount maxRetryTime:(NSUInteger)maxRetryTime completion:(void (^)(NSString *marketingCloudId, NSError *))completion;
-- (void) syncMarketingCloudId:(NSString *)advertisingId organizationId:(NSString *)organizationId marketingCloudId:(NSString *)marketingCloudId completion:(void (^)(NSError *))completion;
++ (void) getMarketingCloudId:(NSString *)organizationId maxRetryCount:(NSUInteger)maxRetryCount currentRetryCount:(NSUInteger)currentRetryCount maxRetryTimeSecs:(NSUInteger)maxRetryTimeSecs completion:(void (^)(NSString *marketingCloudId, NSError *))completion;
+- (void) syncMarketingCloudId:(NSString *)advertisingId organizationId:(NSString *)organizationId marketingCloudId:(NSString *)marketingCloudId maxRetryCount:(NSUInteger)maxRetryCount currentRetryCount:(NSUInteger)currentRetryCount maxRetryTimeSecs:(NSUInteger)maxRetryTimeSecs completion:(void (^)(NSError *))completion;
 
 @end
 
