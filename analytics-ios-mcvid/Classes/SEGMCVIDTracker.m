@@ -42,6 +42,8 @@
     NSUInteger maxRetryCount = 11;
     NSUInteger currentRetryCount = 1;
     NSUInteger maxRetryTimeSecs = 300;
+    self.backgroundQueue = dispatch_queue_create("com.segment.mcvid", NULL);
+
 
     //Store advertisingId and marketingCloudId on local storage
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -86,6 +88,7 @@
     NSString *advertisingId = nil;
 
     NSURL *url = [self createURL:advertisingId organizationId:organizationId marketingCloudId:marketingCloud];
+
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:config];
@@ -108,7 +111,6 @@
 
         
         // or { ..., "errors": [{ "code": 2, "msg": "error" } ... ], ... }
-        NSDictionary *errorDictionary = dictionary[errorResponseKey];
         NSError *errorObject = dictionary[errorResponseKey][0];
         NSString *errorMessage = dictionary[@"errors"][0][@"msg"];
         
@@ -131,7 +133,6 @@
             completion(marketingCloudId, nil);
         } else {
             dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * milliSecondsToWait);
-            self.backgroundQueue = dispatch_queue_create("com.exmaple.MyCustomQueue", NULL);
             dispatch_after(delay, self.backgroundQueue, ^(void){
                 [self getMarketingCloudId:organizationId maxRetryCount:maxRetryCount currentRetryCount:currentRetryCount+1 maxRetryTimeSecs:maxRetryTimeSecs completion:^(NSString *marketingCloudId, NSError *error) {
                 }];
@@ -168,7 +169,6 @@
         }
         
         // or { ..., "errors": [{ "code": 2, "msg": "error" } ... ], ... }
-        NSDictionary *errorDictionary = dictionary[errorResponseKey];
         NSError *errorObject = dictionary[errorResponseKey][0];
         NSString *errorMessage = dictionary[@"errors"][0][@"msg"];
         
@@ -191,7 +191,6 @@
             completion(nil);
         } else {
             dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * milliSecondsToWait);
-            self.backgroundQueue = dispatch_queue_create("com.exmaple.MyCustomQueueu", NULL);
             dispatch_after(delay, self.backgroundQueue, ^(void){
                 [self syncMarketingCloudId:advertisingId organizationId:organizationId marketingCloudId:marketingCloudId maxRetryCount:maxRetryCount currentRetryCount:currentRetryCount+1 maxRetryTimeSecs:maxRetryTimeSecs completion:^(NSError *error){
                 }];
@@ -230,6 +229,7 @@
     [queryItems addObject:[NSURLQueryItem queryItemWithName:jsonFormatterKey value:jsonFormatter]];
     [queryItems addObject:[NSURLQueryItem queryItemWithName:regionKey value:region]];
     [queryItems addObject:[NSURLQueryItem queryItemWithName:organizationIdKey value:organizationId]];
+    
     if (marketingCloudId) {
         [queryItems addObject:[NSURLQueryItem queryItemWithName:marketingCloudIdKey value:marketingCloudId]];
         NSString *encodedAdvertisingValue = [NSString stringWithFormat:@"%@%@%@", deviceTypeKey, separator, advertisingId];
