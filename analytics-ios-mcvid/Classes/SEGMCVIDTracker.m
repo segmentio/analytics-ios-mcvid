@@ -58,10 +58,10 @@
     [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     //This is was SEGIDFA() is going under the hood. NSString *idfaString = [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     NSString *segIdfa = SEGIDFA();
-    _cachedMarketingCloudId = [defaults stringForKey:@"MarketingCloudId"];
+    _cachedMarketingCloudId = [defaults stringForKey:@"com.segment.mcvid.marketingCloudId"];
     if (![_cachedAdvertisingId isEqualToString:segIdfa]) {
-        [defaults setObject:segIdfa forKey:@"AdvertisingId"];
-        _cachedAdvertisingId = [defaults stringForKey:@"AdvertisingId"];
+        [defaults setObject:segIdfa forKey:@"com.segment.mcvid.advertisingId"];
+        _cachedAdvertisingId = [defaults stringForKey:@"com.segment.mcvid.advertisingId"];
     }
     
     
@@ -70,7 +70,7 @@
 
     if (self.cachedMarketingCloudId.length == 0 || (segIdfa != self.cachedAdvertisingId)) {
         [self getMarketingCloudId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
-          [defaults setObject:marketingCloudId forKey:@"MarketingCloudId"];
+          [defaults setObject:marketingCloudId forKey:@"com.segment.mcvid.marketingCloudId"];
             [self syncIntegrationCode:integrationCode userIdentifier:self.cachedAdvertisingId completion:^(NSError *error) {
               if (error) {
                   return;
