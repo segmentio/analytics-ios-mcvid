@@ -24,6 +24,12 @@
 }
 @end
 
+@interface SEGMCVIDTracker()
+    @property(nonatomic) NSUInteger maxRetryCount;
+    @property(nonatomic) NSUInteger currentRetryCount;
+    @property(nonatomic) NSUInteger maxRetryTimeSecs;
+@end
+
 @implementation SEGMCVIDTracker
 
 + (id<SEGMiddleware>)middlewareWithOrganizationId:(NSString *)organizationId region:(NSString *)region {
@@ -39,9 +45,9 @@
     }
 
     //Values for exponential backoff retry logic for API calls
-    NSUInteger maxRetryCount = 11;
-    NSUInteger currentRetryCount = 1;
-    NSUInteger maxRetryTimeSecs = 300;
+    _maxRetryCount = 11;
+    _currentRetryCount = 1;
+    _maxRetryTimeSecs = 300;
     self.backgroundQueue = dispatch_queue_create("com.segment.mcvid", NULL);
 
 
@@ -56,17 +62,17 @@
         [defaults setObject:segIdfa forKey:@"AdvertisingId"];
     }
 
-    if (cachedMarketingCloudId.length == 0) {
-        [self getMarketingCloudId:organizationId maxRetryCount:maxRetryCount currentRetryCount:currentRetryCount maxRetryTimeSecs:maxRetryTimeSecs completion:^(NSString *marketingCloudId, NSError *error) {
+    if (cachedMarketingCloudId.length == 0 || (segIdfa != cachedAdvertisingId)) {
+        [self getMarketingCloudId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
           [defaults setObject:marketingCloudId forKey:@"MarketingCloudId"];
-          [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId marketingCloudId:cachedMarketingCloudId maxRetryCount:maxRetryCount currentRetryCount:currentRetryCount maxRetryTimeSecs:maxRetryTimeSecs completion:^(NSError *error) {
+          [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId marketingCloudId:cachedMarketingCloudId completion:^(NSError *error) {
               if (error) {
                   return;
               }
           }];
         }];
     } else if (cachedMarketingCloudId.length != 0) {
-      [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId marketingCloudId:cachedMarketingCloudId maxRetryCount:maxRetryCount currentRetryCount:currentRetryCount maxRetryTimeSecs:maxRetryTimeSecs completion:^(NSError *error) {
+      [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId marketingCloudId:cachedMarketingCloudId completion:^(NSError *error) {
           if (error) {
               return;
           }
@@ -76,7 +82,7 @@
     return self;
   }
 
-- (void)getMarketingCloudId:(NSString *)organizationId maxRetryCount:(NSUInteger)maxRetryCount currentRetryCount:(NSUInteger)currentRetryCount maxRetryTimeSecs:(NSUInteger)maxRetryTimeSecs completion:(void (^)(NSString *marketingCloudId, NSError *))completion {
+- (void)getMarketingCloudId:(NSString *)organizationId completion:(void (^)(NSString *marketingCloudId, NSError *))completion {
     
     //Response and error handling variables
     NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
@@ -86,6 +92,10 @@
 
     NSString *marketingCloud = nil;
     NSString *advertisingId = nil;
+    
+    NSLog(@"currentRetryCount %lu", _currentRetryCount);
+    NSLog(@"maxRetryTimeSecs %lu", _maxRetryTimeSecs);
+    NSLog(@"maxRetryCount %lu", _maxRetryCount);
 
     NSURL *url = [self createURL:advertisingId organizationId:organizationId marketingCloudId:marketingCloud];
 
@@ -115,17 +125,18 @@
         NSString *errorMessage = dictionary[@"errors"][0][@"msg"];
         
         NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
-        NSInteger responseStatusCode = [httpResponse statusCode];
+        NSInteger responseStatusCode = 400;
+        [httpResponse statusCode];
         
         //Logic for exponential backoff algorithm
-        NSUInteger milliSecondsToWait = currentRetryCount * currentRetryCount;
-        NSUInteger milliSecondsWaited = currentRetryCount * (currentRetryCount + 1)  * ((2 * currentRetryCount) + 1)/6;
+        NSUInteger milliSecondsToWait = self.currentRetryCount * self.currentRetryCount;
+        NSUInteger milliSecondsWaited = self.currentRetryCount * (self.currentRetryCount + 1)  * ((2 * self.currentRetryCount) + 1)/6;
 
-        if ((currentRetryCount > maxRetryCount) && errorObject) {
+        if ((self.currentRetryCount > self.maxRetryCount) && errorObject) {
             return callbackWithCode(MCVIDAdobeErrorCodeServerError, errorMessage, errorObject);
         }
 
-        if ((milliSecondsWaited / 1 >= maxRetryTimeSecs) && errorObject) {
+        if ((milliSecondsWaited / 1 >= self.maxRetryTimeSecs) && errorObject) {
             return callbackWithCode(MCVIDAdobeErrorCodeServerError, errorMessage, errorObject);
         }
 
@@ -134,14 +145,15 @@
         } else {
             dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * milliSecondsToWait);
             dispatch_after(delay, self.backgroundQueue, ^(void){
-                [self getMarketingCloudId:organizationId maxRetryCount:maxRetryCount currentRetryCount:currentRetryCount+1 maxRetryTimeSecs:maxRetryTimeSecs completion:^(NSString *marketingCloudId, NSError *error) {
+                self.currentRetryCount = self.currentRetryCount + 1;
+                [self getMarketingCloudId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
                 }];
             });
         }
     }] resume];
 }
 
-- (void)syncMarketingCloudId:(NSString *)advertisingId organizationId:(NSString *)organizationId marketingCloudId:(NSString *)marketingCloudId maxRetryCount:(NSUInteger)maxRetryCount currentRetryCount:(NSUInteger)currentRetryCount maxRetryTimeSecs:(NSUInteger)maxRetryTimeSecs completion:(void (^)(NSError *))completion {
+- (void)syncMarketingCloudId:(NSString *)advertisingId organizationId:(NSString *)organizationId marketingCloudId:(NSString *)marketingCloudId completion:(void (^)(NSError *))completion {
     
     //Response and error handling variables
     NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
@@ -175,15 +187,15 @@
 
         NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
         NSInteger responseStatusCode = [httpResponse statusCode];
-        NSUInteger milliSecondsToWait = currentRetryCount * currentRetryCount;
-        NSUInteger milliSecondsWaited = currentRetryCount * (currentRetryCount + 1)  * ((2 * currentRetryCount) + 1)/6;
+        NSUInteger milliSecondsToWait = self.currentRetryCount * self.currentRetryCount;
+        NSUInteger milliSecondsWaited = self.currentRetryCount * (self.currentRetryCount + 1)  * ((2 * self.currentRetryCount) + 1)/6;
         
-        if ((currentRetryCount > maxRetryCount) && (errorObject)) {
+        if ((self.currentRetryCount > self.maxRetryCount) && (errorObject)) {
             return callbackWithCode(MCVIDAdobeErrorCodeServerError, errorMessage, errorObject);
 
         }
         
-        if (milliSecondsWaited / 1 >= maxRetryTimeSecs && (errorObject)) {
+        if (milliSecondsWaited / 1 >= self.maxRetryTimeSecs && (errorObject)) {
             return callbackWithCode(MCVIDAdobeErrorCodeServerError, errorMessage, errorObject);
         }
         
@@ -192,7 +204,8 @@
         } else {
             dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * milliSecondsToWait);
             dispatch_after(delay, self.backgroundQueue, ^(void){
-                [self syncMarketingCloudId:advertisingId organizationId:organizationId marketingCloudId:marketingCloudId maxRetryCount:maxRetryCount currentRetryCount:currentRetryCount+1 maxRetryTimeSecs:maxRetryTimeSecs completion:^(NSError *error){
+                self.currentRetryCount = self.currentRetryCount + 1;
+                [self syncMarketingCloudId:advertisingId organizationId:organizationId marketingCloudId:marketingCloudId completion:^(NSError *error){
                 }];
             });
         }
