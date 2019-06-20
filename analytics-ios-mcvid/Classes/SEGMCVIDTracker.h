@@ -7,13 +7,6 @@
 
 @property (nonatomic, strong) NSString *organizationId;
 @property (nonatomic, strong) NSString *region;
-@property(readonly, copy) NSString *stringByRemovingPercentEncoding;
-@property(nonatomic, strong) NSString *staticMarketingCloudId;
-@property(nonatomic) NSString *cachedAdvertisingId;
-@property(nonatomic) NSString *cachedMarketingCloudId;
-//@property(nonatomic) NSUInteger *maxRetryCount;
-//@property(nonatomic) NSUInteger *currentRetryCount;
-//@property(nonatomic) NSUInteger *maxRetryTimeSecs;
 @property dispatch_queue_t backgroundQueue;
 
 - (void) syncMarketingCloudId:(NSString *)advertisingId organizationId:(NSString *)organizationId marketingCloudId:(NSString *)marketingCloudId completion:(void (^)(NSError *))completion;
