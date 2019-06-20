@@ -253,17 +253,9 @@
       return;
     }
 
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  NSString *cachedMarketingCloudId = [defaults stringForKey:@"MarketingCloudId"];
-
-  if (!cachedMarketingCloudId) {
+  if (!self.cachedMarketingCloudId) {
     next(context);
     return;
-  }
-
-  if (!_organizationId) {
-     next(context);
-     return;
   }
 
   SEGIdentifyPayload *identify =(SEGIdentifyPayload *)context.payload;
@@ -271,9 +263,9 @@
   SEGScreenPayload *screen =(SEGScreenPayload *)context.payload;
   SEGGroupPayload *group =(SEGGroupPayload *)context.payload;
 
-  if (cachedMarketingCloudId.length) {
+  if (self.cachedMarketingCloudId.length) {
     NSMutableDictionary *mergedIntegrations = [NSMutableDictionary dictionaryWithCapacity:100];
-    NSDictionary *mcidIntegrations = @{@"Adobe Analytics" : @{ @"marketingCloudVisitorId": cachedMarketingCloudId } };
+    NSDictionary *mcidIntegrations = @{@"Adobe Analytics" : @{ @"marketingCloudVisitorId": self.cachedMarketingCloudId } };
     [mergedIntegrations addEntriesFromDictionary:mcidIntegrations];
 
     if ([context.payload isKindOfClass:[SEGIdentifyPayload class]]){
