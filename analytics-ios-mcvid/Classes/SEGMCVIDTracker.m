@@ -55,15 +55,15 @@
 
     //Store advertisingId and marketingCloudId on local storage
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    _cachedMarketingCloudId = [defaults stringForKey:@"MarketingCloudId"];
-    
-      [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
+    [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     //This is was SEGIDFA() is going under the hood. NSString *idfaString = [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     NSString *segIdfa = SEGIDFA();
-    if (![self.cachedAdvertisingId isEqualToString:segIdfa]) {
+    _cachedMarketingCloudId = [defaults stringForKey:@"MarketingCloudId"];
+    if (![_cachedAdvertisingId isEqualToString:segIdfa]) {
         [defaults setObject:segIdfa forKey:@"AdvertisingId"];
+        _cachedAdvertisingId = [defaults stringForKey:@"AdvertisingId"];
     }
-    _cachedAdvertisingId = [defaults stringForKey:@"AdvertisingId"];
+    
     
     //Defaut value for integration code which indicate ios
     NSString *integrationCode = @"DSID_20915";
