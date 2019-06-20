@@ -16,7 +16,6 @@
 @property(nonatomic) NSUInteger *maxRetryTimeSecs;
 @property dispatch_queue_t backgroundQueue;
 
-+ (void) getMarketingCloudId:(NSString *)organizationId maxRetryCount:(NSUInteger)maxRetryCount currentRetryCount:(NSUInteger)currentRetryCount maxRetryTimeSecs:(NSUInteger)maxRetryTimeSecs completion:(void (^)(NSString *marketingCloudId, NSError *))completion;
 - (void) syncMarketingCloudId:(NSString *)advertisingId organizationId:(NSString *)organizationId marketingCloudId:(NSString *)marketingCloudId maxRetryCount:(NSUInteger)maxRetryCount currentRetryCount:(NSUInteger)currentRetryCount maxRetryTimeSecs:(NSUInteger)maxRetryTimeSecs completion:(void (^)(NSError *))completion;
 
 @end
