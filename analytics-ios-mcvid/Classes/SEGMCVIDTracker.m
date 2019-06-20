@@ -3,8 +3,7 @@
 #import <AdSupport/ASIdentifierManager.h>
 #include <time.h>
 #include <stdlib.h>
-
-
+#include <math.h>
 
 @interface MCVIDAdobeError ()
 
@@ -68,7 +67,7 @@
     //Defaut value for integration code which indicate ios
     NSString *integrationCode = @"DSID_20915";
 
-    if (self.cachedMarketingCloudId.length == 0 || (segIdfa != self.cachedAdvertisingId)) {
+    if (self.cachedMarketingCloudId.length == 0) {
         [self getMarketingCloudId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
           [defaults setObject:marketingCloudId forKey:@"com.segment.mcvid.marketingCloudId"];
             [self syncIntegrationCode:integrationCode userIdentifier:self.cachedAdvertisingId completion:^(NSError *error) {
@@ -130,21 +129,21 @@
         NSInteger responseStatusCode = [httpResponse statusCode];
         
         //Logic for exponential backoff algorithm
-        NSUInteger milliSecondsToWait = self.currentRetryCount * self.currentRetryCount;
-        NSUInteger milliSecondsWaited = self.currentRetryCount * (self.currentRetryCount + 1)  * ((2 * self.currentRetryCount) + 1)/6;
+        NSUInteger secondsToWait = pow(2, self.currentRetryCount);
+        NSUInteger secondsWaited = self.currentRetryCount * (self.currentRetryCount + 1)  * ((2 * self.currentRetryCount) + 1)/6;
 
         if ((self.currentRetryCount > self.maxRetryCount) && errorObject) {
             return callbackWithCode(MCVIDAdobeErrorCodeServerError, errorMessage, errorObject);
         }
 
-        if ((milliSecondsWaited / 1 >= self.maxRetryTimeSecs) && errorObject) {
+        if ((secondsWaited / 1 >= self.maxRetryTimeSecs) && errorObject) {
             return callbackWithCode(MCVIDAdobeErrorCodeServerError, errorMessage, errorObject);
         }
 
         if (responseStatusCode == 200 && (!errorObject) ){
             completion(marketingCloudId, nil);
         } else {
-            dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * milliSecondsToWait);
+            dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * secondsToWait);
             dispatch_after(delay, self.backgroundQueue, ^(void){
                 self.currentRetryCount = self.currentRetryCount + 1;
                 [self getMarketingCloudId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
@@ -189,22 +188,22 @@
 
         NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
         NSInteger responseStatusCode = [httpResponse statusCode];
-        NSUInteger milliSecondsToWait = self.currentRetryCount * self.currentRetryCount;
-        NSUInteger milliSecondsWaited = self.currentRetryCount * (self.currentRetryCount + 1)  * ((2 * self.currentRetryCount) + 1)/6;
+        NSUInteger secondsToWait = pow(2, self.currentRetryCount);
+        NSUInteger secondsWaited = self.currentRetryCount * (self.currentRetryCount + 1)  * ((2 * self.currentRetryCount) + 1)/6;
         
         if ((self.currentRetryCount > self.maxRetryCount) && (errorObject)) {
             return callbackWithCode(MCVIDAdobeErrorCodeServerError, errorMessage, errorObject);
 
         }
         
-        if (milliSecondsWaited / 1 >= self.maxRetryTimeSecs && (errorObject)) {
+        if (secondsWaited / 1 >= self.maxRetryTimeSecs && (errorObject)) {
             return callbackWithCode(MCVIDAdobeErrorCodeServerError, errorMessage, errorObject);
         }
         
         if ((responseStatusCode == 200) && (!errorObject)){
             completion(nil);
         } else {
-            dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * milliSecondsToWait);
+            dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * secondsToWait);
             dispatch_after(delay, self.backgroundQueue, ^(void){
                 self.currentRetryCount = self.currentRetryCount + 1;
                 [self syncIntegrationCode:integrationCode userIdentifier:self.cachedAdvertisingId completion:^(NSError *error){
