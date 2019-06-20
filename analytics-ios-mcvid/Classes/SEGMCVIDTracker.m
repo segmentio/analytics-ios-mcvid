@@ -130,13 +130,8 @@
         
         //Logic for exponential backoff algorithm
         NSUInteger secondsToWait = pow(2, self.currentRetryCount);
-        NSUInteger secondsWaited = self.currentRetryCount * (self.currentRetryCount + 1)  * ((2 * self.currentRetryCount) + 1)/6;
 
         if ((self.currentRetryCount > self.maxRetryCount) && errorObject) {
-            return callbackWithCode(MCVIDAdobeErrorCodeServerError, errorMessage, errorObject);
-        }
-
-        if ((secondsWaited / 1 >= self.maxRetryTimeSecs) && errorObject) {
             return callbackWithCode(MCVIDAdobeErrorCodeServerError, errorMessage, errorObject);
         }
 
@@ -189,16 +184,11 @@
         NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
         NSInteger responseStatusCode = [httpResponse statusCode];
         NSUInteger secondsToWait = pow(2, self.currentRetryCount);
-        NSUInteger secondsWaited = self.currentRetryCount * (self.currentRetryCount + 1)  * ((2 * self.currentRetryCount) + 1)/6;
         
         if ((self.currentRetryCount > self.maxRetryCount) && (errorObject)) {
             return callbackWithCode(MCVIDAdobeErrorCodeServerError, errorMessage, errorObject);
-
         }
         
-        if (secondsWaited / 1 >= self.maxRetryTimeSecs && (errorObject)) {
-            return callbackWithCode(MCVIDAdobeErrorCodeServerError, errorMessage, errorObject);
-        }
         
         if ((responseStatusCode == 200) && (!errorObject)){
             completion(nil);
