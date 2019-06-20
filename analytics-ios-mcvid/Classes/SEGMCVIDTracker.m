@@ -28,6 +28,7 @@
     @property(nonatomic) NSUInteger maxRetryCount;
     @property(nonatomic) NSUInteger currentRetryCount;
     @property(nonatomic) NSUInteger maxRetryTimeSecs;
+    @property(nonatomic) NSString *cachedMarketingCloudId;
 @end
 
 @implementation SEGMCVIDTracker
@@ -53,31 +54,33 @@
 
     //Store advertisingId and marketingCloudId on local storage
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSString *cachedMarketingCloudId = [defaults stringForKey:@"MarketingCloudId"];
+    _cachedMarketingCloudId = [defaults stringForKey:@"MarketingCloudId"];
     NSString *cachedAdvertisingId = [defaults stringForKey:@"AdvertisingId"];
     [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     //This is was SEGIDFA() is going under the hood. NSString *idfaString = [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     NSString *segIdfa = SEGIDFA();
+      
     if (![cachedAdvertisingId isEqualToString:segIdfa]) {
         [defaults setObject:segIdfa forKey:@"AdvertisingId"];
     }
 
-    if (cachedMarketingCloudId.length == 0 || (segIdfa != cachedAdvertisingId)) {
+    if (self.cachedMarketingCloudId.length == 0 || (segIdfa != cachedAdvertisingId)) {
         [self getMarketingCloudId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
           [defaults setObject:marketingCloudId forKey:@"MarketingCloudId"];
-          [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId marketingCloudId:cachedMarketingCloudId completion:^(NSError *error) {
+          [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId completion:^(NSError *error) {
               if (error) {
                   return;
               }
           }];
         }];
-    } else if (cachedMarketingCloudId.length != 0) {
-      [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId marketingCloudId:cachedMarketingCloudId completion:^(NSError *error) {
+    } else if (self.cachedMarketingCloudId.length != 0) {
+      [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId completion:^(NSError *error) {
           if (error) {
               return;
           }
       }];
     }
+      
     [defaults synchronize];
     return self;
   }
@@ -92,10 +95,6 @@
 
     NSString *marketingCloud = nil;
     NSString *advertisingId = nil;
-    
-    NSLog(@"currentRetryCount %lu", _currentRetryCount);
-    NSLog(@"maxRetryTimeSecs %lu", _maxRetryTimeSecs);
-    NSLog(@"maxRetryCount %lu", _maxRetryCount);
 
     NSURL *url = [self createURL:advertisingId organizationId:organizationId marketingCloudId:marketingCloud];
 
@@ -125,8 +124,7 @@
         NSString *errorMessage = dictionary[@"errors"][0][@"msg"];
         
         NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
-        NSInteger responseStatusCode = 400;
-        [httpResponse statusCode];
+        NSInteger responseStatusCode = [httpResponse statusCode];
         
         //Logic for exponential backoff algorithm
         NSUInteger milliSecondsToWait = self.currentRetryCount * self.currentRetryCount;
@@ -153,14 +151,14 @@
     }] resume];
 }
 
-- (void)syncMarketingCloudId:(NSString *)advertisingId organizationId:(NSString *)organizationId marketingCloudId:(NSString *)marketingCloudId completion:(void (^)(NSError *))completion {
+- (void)syncMarketingCloudId:(NSString *)advertisingId organizationId:(NSString *)organizationId completion:(void (^)(NSError *))completion {
     
     //Response and error handling variables
     NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
     NSString *errorResponseKey = @"errors";
     NSString *errorDomain = @"Segment-Adobe";
 
-    NSURL *url = [self createURL:advertisingId organizationId:organizationId marketingCloudId:marketingCloudId];
+    NSURL *url = [self createURL:advertisingId organizationId:organizationId marketingCloudId:self.cachedMarketingCloudId];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:config];
@@ -205,7 +203,7 @@
             dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * milliSecondsToWait);
             dispatch_after(delay, self.backgroundQueue, ^(void){
                 self.currentRetryCount = self.currentRetryCount + 1;
-                [self syncMarketingCloudId:advertisingId organizationId:organizationId marketingCloudId:marketingCloudId completion:^(NSError *error){
+                [self syncMarketingCloudId:advertisingId organizationId:organizationId completion:^(NSError *error){
                 }];
             });
         }
