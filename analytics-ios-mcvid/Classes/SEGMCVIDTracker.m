@@ -29,6 +29,7 @@
     @property(nonatomic) NSUInteger currentRetryCount;
     @property(nonatomic) NSUInteger maxRetryTimeSecs;
     @property(nonatomic) NSString *cachedMarketingCloudId;
+    @property(nonatomic) NSString *cachedAdvertisingId;
 @end
 
 @implementation SEGMCVIDTracker
@@ -55,26 +56,28 @@
     //Store advertisingId and marketingCloudId on local storage
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     _cachedMarketingCloudId = [defaults stringForKey:@"MarketingCloudId"];
-    NSString *cachedAdvertisingId = [defaults stringForKey:@"AdvertisingId"];
+    _cachedAdvertisingId = [defaults stringForKey:@"AdvertisingId"];
     [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     //This is was SEGIDFA() is going under the hood. NSString *idfaString = [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     NSString *segIdfa = SEGIDFA();
+    NSString *integrationCode = @"DSID_20915";//means ios
+
       
-    if (![cachedAdvertisingId isEqualToString:segIdfa]) {
+    if (![self.cachedAdvertisingId isEqualToString:segIdfa]) {
         [defaults setObject:segIdfa forKey:@"AdvertisingId"];
     }
 
-    if (self.cachedMarketingCloudId.length == 0 || (segIdfa != cachedAdvertisingId)) {
+    if (self.cachedMarketingCloudId.length == 0 || (segIdfa != self.cachedAdvertisingId)) {
         [self getMarketingCloudId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
           [defaults setObject:marketingCloudId forKey:@"MarketingCloudId"];
-          [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId completion:^(NSError *error) {
+            [self syncIntegrationCode:integrationCode userIdentifier:self.cachedAdvertisingId completion:^(NSError *error) {
               if (error) {
                   return;
               }
           }];
         }];
     } else if (self.cachedMarketingCloudId.length != 0) {
-      [self syncMarketingCloudId:cachedAdvertisingId organizationId:organizationId completion:^(NSError *error) {
+      [self syncIntegrationCode:integrationCode userIdentifier:self.cachedAdvertisingId completion:^(NSError *error) {
           if (error) {
               return;
           }
@@ -93,10 +96,9 @@
     NSString *errorDomain = @"Segment-Adobe";
     NSString *marketingCloudIdKey = @"d_mid";
 
-    NSString *marketingCloud = nil;
-    NSString *advertisingId = nil;
+    NSString *callType = @"getmMarketingCloudId";
 
-    NSURL *url = [self createURL:advertisingId organizationId:organizationId marketingCloudId:marketingCloud];
+    NSURL *url = [self createURL:callType integrationCode:@"DSID_20915"];
 
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
@@ -151,14 +153,15 @@
     }] resume];
 }
 
-- (void)syncMarketingCloudId:(NSString *)advertisingId organizationId:(NSString *)organizationId completion:(void (^)(NSError *))completion {
+- (void)syncIntegrationCode:(NSString *)integrationCode userIdentifier:(NSString *)userIdentifier completion:(void (^)(NSError *))completion {
     
     //Response and error handling variables
     NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
     NSString *errorResponseKey = @"errors";
     NSString *errorDomain = @"Segment-Adobe";
+    NSString *callType =@"syncIntegrationCode";
 
-    NSURL *url = [self createURL:advertisingId organizationId:organizationId marketingCloudId:self.cachedMarketingCloudId];
+    NSURL *url = [self createURL:callType integrationCode:integrationCode];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:config];
@@ -203,14 +206,14 @@
             dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * milliSecondsToWait);
             dispatch_after(delay, self.backgroundQueue, ^(void){
                 self.currentRetryCount = self.currentRetryCount + 1;
-                [self syncMarketingCloudId:advertisingId organizationId:organizationId completion:^(NSError *error){
+                [self syncIntegrationCode:integrationCode userIdentifier:self.cachedAdvertisingId completion:^(NSError *error){
                 }];
             });
         }
     }] resume];
 }
 
-- (NSURL *)createURL:advertisingId organizationId:(NSString *)organizationId marketingCloudId:(NSString *)marketingCloudId {
+- (NSURL *)createURL:callType integrationCode:(NSString *)integrationCode {
     //Variables to build URL for GET request
     NSString *protocol = @"https";
     NSString *host = @"dpm.demdex.net";
@@ -227,7 +230,6 @@
     NSString *organizationIdKey = @"d_orgid"; //can retrieve from settings
 
     //Variables for when advertising Id is present
-    NSString *deviceTypeKey = @"DSID_20915";//means ios
     NSString *separator = @"%01";
     NSString *advertisingIdKey = @"d_cid_ic";
 
@@ -239,11 +241,11 @@
     [queryItems addObject:[NSURLQueryItem queryItemWithName:versionKey value:version]];
     [queryItems addObject:[NSURLQueryItem queryItemWithName:jsonFormatterKey value:jsonFormatter]];
     [queryItems addObject:[NSURLQueryItem queryItemWithName:regionKey value:region]];
-    [queryItems addObject:[NSURLQueryItem queryItemWithName:organizationIdKey value:organizationId]];
+    [queryItems addObject:[NSURLQueryItem queryItemWithName:organizationIdKey value:self.organizationId]];
     
-    if (marketingCloudId) {
-        [queryItems addObject:[NSURLQueryItem queryItemWithName:marketingCloudIdKey value:marketingCloudId]];
-        NSString *encodedAdvertisingValue = [NSString stringWithFormat:@"%@%@%@", deviceTypeKey, separator, advertisingId];
+    if ([callType isEqualToString:@"syncIntegrationCode"]) {
+        [queryItems addObject:[NSURLQueryItem queryItemWithName:marketingCloudIdKey value:self.cachedMarketingCloudId]];
+        NSString *encodedAdvertisingValue = [NSString stringWithFormat:@"%@%@%@", integrationCode, separator, self.cachedAdvertisingId];
         //removes %25 html encoding of '%'
         NSString *normalAdvertisingValue = [encodedAdvertisingValue stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         [queryItems addObject:[NSURLQueryItem queryItemWithName:advertisingIdKey value:normalAdvertisingValue]];

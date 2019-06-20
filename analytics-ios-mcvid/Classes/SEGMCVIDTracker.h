@@ -9,7 +9,8 @@
 @property (nonatomic, strong) NSString *region;
 @property dispatch_queue_t backgroundQueue;
 
-- (void) syncMarketingCloudId:(NSString *)advertisingId organizationId:(NSString *)organizationId marketingCloudId:(NSString *)marketingCloudId completion:(void (^)(NSError *))completion;
+- (void) syncMarketingCloudId:(NSString *)advertisingId organizationId:(NSString *)organizationId completion:(void (^)(NSError *))completion;
+- (void)syncIntegrationCode:(NSString *)integrationCode userIdentifier:(NSString *)userIdentifier completion:(void (^)(NSError *))completion;
 
 @end
 
