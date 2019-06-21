@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
+
 @interface MCVIDAdobeError ()
 
 - (id)initWithCode:(MCVIDAdobeErrorCode)code message:(NSString *)message error:(NSError *)error;
@@ -62,8 +64,8 @@
         [defaults setObject:segIdfa forKey:@"com.segment.mcvid.advertisingId"];
         _cachedAdvertisingId = [defaults stringForKey:@"com.segment.mcvid.advertisingId"];
     }
-    
-    
+
+
     //Defaut value for integration code which indicate ios
     NSString *integrationCode = @"DSID_20915";
 
@@ -84,15 +86,14 @@
           }
       }];
     }
-      
+
     [defaults synchronize];
     return self;
   }
 
 - (void)getMarketingCloudId:(NSString *)organizationId completion:(void (^)(NSString *marketingCloudId, NSError *))completion {
-    
+
     //Response and error handling variables
-    NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
     NSString *errorResponseKey = @"errors";
     NSString *errorDomain = @"Segment-Adobe";
     NSString *marketingCloudIdKey = @"d_mid";
@@ -111,24 +112,24 @@
             NSError *compositeError = [NSError errorWithDomain:errorDomain code:adobeError.code userInfo:@{MCVIDAdobeErrorKey:adobeError}];
             completion(nil, compositeError);
         };
-        
+
         NSDictionary *dictionary = nil;
         @try {
             dictionary = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
         } @catch (NSException *exception) {
             return callbackWithCode(MCVIDAdobeErrorCodeClientSerializationError, @"Deserializing the JSON response failed", nil);
         }
-        
+
         NSString *marketingCloudId = dictionary[marketingCloudIdKey];
 
-        
+
         // or { ..., "errors": [{ "code": 2, "msg": "error" } ... ], ... }
         NSError *errorObject = dictionary[errorResponseKey][0];
         NSString *errorMessage = dictionary[@"errors"][0][@"msg"];
-        
+
         NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
         NSInteger responseStatusCode = [httpResponse statusCode];
-        
+
         //Logic for exponential backoff algorithm
         NSUInteger secondsToWait = pow(2, self.currentRetryCount);
 
@@ -150,9 +151,8 @@
 }
 
 - (void)syncIntegrationCode:(NSString *)integrationCode userIdentifier:(NSString *)userIdentifier completion:(void (^)(NSError *))completion {
-    
+
     //Response and error handling variables
-    NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
     NSString *errorResponseKey = @"errors";
     NSString *errorDomain = @"Segment-Adobe";
     NSString *callType =@"syncIntegrationCode";
@@ -176,21 +176,21 @@
         } @catch (NSException *exception) {
             return callbackWithCode(MCVIDAdobeErrorCodeClientSerializationError, @"Deserializing the JSON response failed", nil);
         }
-        
+
         // or { ..., "errors": [{ "code": 2, "msg": "error" } ... ], ... }
         NSError *errorObject = dictionary[errorResponseKey][0];
         NSString *errorMessage = dictionary[@"errors"][0][@"msg"];
-        
+
 
         NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
         NSInteger responseStatusCode = [httpResponse statusCode];
         NSUInteger secondsToWait = pow(2, self.currentRetryCount);
-        
+
         if ((self.currentRetryCount > self.maxRetryCount) && (errorObject)) {
             return callbackWithCode(MCVIDAdobeErrorCodeServerError, errorMessage, errorObject);
         }
-        
-        
+
+
         if ((responseStatusCode == 200) && (!errorObject)){
             completion(nil);
         } else {
@@ -233,7 +233,7 @@
     [queryItems addObject:[NSURLQueryItem queryItemWithName:jsonFormatterKey value:jsonFormatter]];
     [queryItems addObject:[NSURLQueryItem queryItemWithName:regionKey value:region]];
     [queryItems addObject:[NSURLQueryItem queryItemWithName:organizationIdKey value:self.organizationId]];
-    
+
     if ([callType isEqualToString:@"syncIntegrationCode"]) {
         [queryItems addObject:[NSURLQueryItem queryItemWithName:marketingCloudIdKey value:self.cachedMarketingCloudId]];
         NSString *encodedAdvertisingValue = [NSString stringWithFormat:@"%@%@%@", integrationCode, separator, self.cachedAdvertisingId];
@@ -243,7 +243,7 @@
     }
     components.queryItems = queryItems;
     NSURL *url = components.URL;
-    
+
     return url;
 }
 

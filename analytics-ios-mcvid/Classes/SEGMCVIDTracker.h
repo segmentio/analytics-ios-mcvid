@@ -18,8 +18,6 @@
 extern NSString *const MCVIDAdobeErrorKey;
 
 typedef NS_ENUM(NSInteger, MCVIDAdobeErrorCode) {
-    // Network request failed
-    MCVIDAdobeErrorCodeClientFailedRequestError,
     // Unable to deserialize JSON from response
     MCVIDAdobeErrorCodeClientSerializationError,
     // An error was provided by the server
