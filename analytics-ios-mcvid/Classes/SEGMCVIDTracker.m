@@ -62,12 +62,10 @@ NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
     //This is was SEGIDFA() is going under the hood. NSString *idfaString = [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     NSString *segIdfa = SEGIDFA();
     _cachedMarketingCloudId = [defaults stringForKey:@"com.segment.mcvid.marketingCloudId"];
-    if (![_cachedAdvertisingId isEqualToString:segIdfa]) {
+    if (_cachedAdvertisingId == NULL) {
         [defaults setObject:segIdfa forKey:@"com.segment.mcvid.advertisingId"];
         _cachedAdvertisingId = [defaults stringForKey:@"com.segment.mcvid.advertisingId"];
     }
-
-
     //Defaut value for integration code which indicate ios
     NSString *integrationCode = @"DSID_20915";
 
@@ -81,7 +79,7 @@ NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
               }
           }];
         }];
-    } else if (self.cachedMarketingCloudId.length != 0) {
+    } else if (![_cachedAdvertisingId isEqualToString:segIdfa]) {
       [self syncIntegrationCode:integrationCode userIdentifier:self.cachedAdvertisingId completion:^(NSError * _Nullable error) {
           if (error) {
               return;
