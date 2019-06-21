@@ -14,7 +14,7 @@ NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
 @end
 
 @implementation MCVIDAdobeError
-- (id)initWithCode:(MCVIDAdobeErrorCode)code message:(NSString *)message error:(NSError *)error {
+- (id)initWithCode:(MCVIDAdobeErrorCode)code message:(NSString * _Nullable)message error:(NSError * _Nullable)error {
    self = [super  init];
    if (self) {
      _code = code;
@@ -29,17 +29,17 @@ NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
     @property(nonatomic) NSUInteger maxRetryCount;
     @property(nonatomic) NSUInteger currentRetryCount;
     @property(nonatomic) NSUInteger maxRetryTimeSecs;
-    @property(nonatomic) NSString *cachedMarketingCloudId;
-    @property(nonatomic) NSString *cachedAdvertisingId;
+    @property(nonatomic, nonnull) NSString *cachedMarketingCloudId;
+    @property(nonatomic, nonnull) NSString *cachedAdvertisingId;
 @end
 
 @implementation SEGMCVIDTracker
 
-+ (id<SEGMiddleware>)middlewareWithOrganizationId:(NSString *)organizationId region:(NSString *)region {
++ (id<SEGMiddleware>)middlewareWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region {
     return [[SEGMCVIDTracker alloc] initWithOrganizationId: organizationId region:region ];
 }
 
--(id)initWithOrganizationId:(NSString *)organizationId region:(NSString *)region
+-(id)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region
   {
     if (self = [super init])
     {
@@ -70,7 +70,7 @@ NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
     NSString *integrationCode = @"DSID_20915";
 
     if (self.cachedMarketingCloudId.length == 0) {
-        [self getMarketingCloudId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
+        [self getMarketingCloudId:organizationId completion:^(NSString  * _Nullable marketingCloudId, NSError * _Nullable error) {
           [defaults setObject:marketingCloudId forKey:@"com.segment.mcvid.marketingCloudId"];
             self.cachedMarketingCloudId = [defaults stringForKey:@"com.segment.mcvid.marketingCloudId"];
             [self syncIntegrationCode:integrationCode userIdentifier:self.cachedAdvertisingId completion:^(NSError *error) {
@@ -80,7 +80,7 @@ NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
           }];
         }];
     } else if (self.cachedMarketingCloudId.length != 0) {
-      [self syncIntegrationCode:integrationCode userIdentifier:self.cachedAdvertisingId completion:^(NSError *error) {
+      [self syncIntegrationCode:integrationCode userIdentifier:self.cachedAdvertisingId completion:^(NSError * _Nullable error) {
           if (error) {
               return;
           }
@@ -91,7 +91,7 @@ NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
     return self;
   }
 
-- (void)getMarketingCloudId:(NSString *)organizationId completion:(void (^)(NSString *marketingCloudId, NSError *))completion {
+- (void)getMarketingCloudId:(NSString *_Nonnull)organizationId completion:(void (^)(NSString * _Nullable marketingCloudId, NSError *_Nullable))completion {
 
     //Response and error handling variables
     NSString *errorResponseKey = @"errors";
@@ -143,14 +143,14 @@ NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
             dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * secondsToWait);
             dispatch_after(delay, self.backgroundQueue, ^(void){
                 self.currentRetryCount = self.currentRetryCount + 1;
-                [self getMarketingCloudId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
+                [self getMarketingCloudId:organizationId completion:^(NSString * _Nullable marketingCloudId, NSError * _Nullable error) {
                 }];
             });
         }
     }] resume];
 }
 
-- (void)syncIntegrationCode:(NSString *)integrationCode userIdentifier:(NSString *)userIdentifier completion:(void (^)(NSError *))completion {
+- (void)syncIntegrationCode:(NSString * _Nonnull)integrationCode userIdentifier:(NSString * _Nonnull)userIdentifier completion:(void (^)(NSError * _Nullable))completion {
 
     //Response and error handling variables
     NSString *errorResponseKey = @"errors";
@@ -190,21 +190,20 @@ NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
             return callbackWithCode(MCVIDAdobeErrorCodeServerError, errorMessage, errorObject);
         }
 
-
         if ((responseStatusCode == 200) && (!errorObject)){
             completion(nil);
         } else {
             dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * secondsToWait);
             dispatch_after(delay, self.backgroundQueue, ^(void){
                 self.currentRetryCount = self.currentRetryCount + 1;
-                [self syncIntegrationCode:integrationCode userIdentifier:self.cachedAdvertisingId completion:^(NSError *error){
+                [self syncIntegrationCode:integrationCode userIdentifier:self.cachedAdvertisingId completion:^(NSError * _Nullable error){
                 }];
             });
         }
     }] resume];
 }
 
-- (NSURL *)createURL:callType integrationCode:(NSString *)integrationCode {
+- (NSURL * _Nonnull)createURL:callType integrationCode:(NSString * _Nonnull)integrationCode {
     //Variables to build URL for GET request
     NSString *protocol = @"https";
     NSString *host = @"dpm.demdex.net";
