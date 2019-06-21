@@ -70,6 +70,7 @@
     if (self.cachedMarketingCloudId.length == 0) {
         [self getMarketingCloudId:organizationId completion:^(NSString *marketingCloudId, NSError *error) {
           [defaults setObject:marketingCloudId forKey:@"com.segment.mcvid.marketingCloudId"];
+            self.cachedMarketingCloudId = [defaults stringForKey:@"com.segment.mcvid.marketingCloudId"];
             [self syncIntegrationCode:integrationCode userIdentifier:self.cachedAdvertisingId completion:^(NSError *error) {
               if (error) {
                   return;
