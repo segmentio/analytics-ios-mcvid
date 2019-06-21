@@ -7,7 +7,6 @@
 
 @property (nonatomic, strong, nonnull) NSString *organizationId;
 @property (nonatomic, strong, nonnull) NSString *region;
-@property dispatch_queue_t _Nonnull backgroundQueue;
 
 - (void)syncIntegrationCode:(NSString *_Nonnull)integrationCode userIdentifier:(NSString *_Nonnull)userIdentifier completion:(void (^_Nonnull)(NSError *_Nullable))completion;
 

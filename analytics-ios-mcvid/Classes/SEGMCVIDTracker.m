@@ -31,6 +31,8 @@ NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
     @property(nonatomic) NSUInteger maxRetryTimeSecs;
     @property(nonatomic, nonnull) NSString *cachedMarketingCloudId;
     @property(nonatomic, nonnull) NSString *cachedAdvertisingId;
+    @property dispatch_queue_t _Nonnull backgroundQueue;
+
 @end
 
 @implementation SEGMCVIDTracker
