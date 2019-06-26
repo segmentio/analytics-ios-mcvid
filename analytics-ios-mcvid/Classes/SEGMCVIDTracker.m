@@ -136,6 +136,7 @@ NSString *const syncIntegrationCallType = @"syncIntegrationCode";
         }
 
         if (responseStatusCode == 200 && (!errorObject) ){
+            self.currentRetryCount = 0;
             completion(marketingCloudId, nil);
         } else {
             dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * secondsToWait);
@@ -187,6 +188,7 @@ NSString *const syncIntegrationCallType = @"syncIntegrationCode";
         }
 
         if ((responseStatusCode == 200) && (!errorObject)){
+            self.currentRetryCount = 0;
             completion(nil);
         } else {
             dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * secondsToWait);
