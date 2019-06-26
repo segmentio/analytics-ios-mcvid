@@ -8,6 +8,9 @@
 NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
 NSString *const getCloudIdCallType = @"getMarketingCloudID";
 NSString *const syncIntegrationCallType = @"syncIntegrationCode";
+NSString *const cachedMarketingCloudIdKey = @"syncIntegrationCode";
+NSString *const cachedAdvertisingIdKey = @"syncIntegrationCode";
+
 
 @interface MCVIDAdobeError ()
 
@@ -59,18 +62,18 @@ NSString *const syncIntegrationCallType = @"syncIntegrationCode";
     //Store advertisingId and marketingCloudId on local storage
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *segIdfa = SEGIDFA();
-    _cachedMarketingCloudId = [defaults stringForKey:@"com.segment.mcvid.marketingCloudId"];
+    _cachedMarketingCloudId = [defaults stringForKey:cachedMarketingCloudIdKey];
     if (_cachedAdvertisingId == NULL) {
-        [defaults setObject:segIdfa forKey:@"com.segment.mcvid.advertisingId"];
-        _cachedAdvertisingId = [defaults stringForKey:@"com.segment.mcvid.advertisingId"];
+        [defaults setObject:segIdfa forKey:cachedAdvertisingIdKey];
+        _cachedAdvertisingId = [defaults stringForKey:cachedAdvertisingIdKey];
     }
     //Defaut value for integration code which indicate ios
     NSString *integrationCode = @"DSID_20915";
 
     if (self.cachedMarketingCloudId.length == 0) {
         [self getMarketingCloudId:organizationId completion:^(NSString  * _Nullable marketingCloudId, NSError * _Nullable error) {
-          [defaults setObject:marketingCloudId forKey:@"com.segment.mcvid.marketingCloudId"];
-            self.cachedMarketingCloudId = [defaults stringForKey:@"com.segment.mcvid.marketingCloudId"];
+          [defaults setObject:marketingCloudId forKey:cachedMarketingCloudIdKey];
+            self.cachedMarketingCloudId = [defaults stringForKey:cachedMarketingCloudIdKey];
             [self syncIntegrationCode:integrationCode userIdentifier:self.cachedAdvertisingId completion:^(NSError *error) {
               if (error) {
                   return;
