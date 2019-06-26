@@ -252,21 +252,20 @@ NSString *const cachedAdvertisingIdKey = @"syncIntegrationCode";
 
 - (void)context:(SEGContext *_Nonnull)context next:(SEGMiddlewareNext _Nonnull)next {
     if ([context.payload isKindOfClass:[SEGAliasPayload class]]) {
-      next(context);
-      return;
+        next(context);
+        return;
+    }
+    
+    if (self.cachedMarketingCloudId.length == 0) {
+        next(context);
+        return;
     }
 
-  if (!self.cachedMarketingCloudId) {
-    next(context);
-    return;
-  }
-
-  SEGIdentifyPayload *identify =(SEGIdentifyPayload *)context.payload;
-  SEGTrackPayload *track =(SEGTrackPayload *)context.payload;
-  SEGScreenPayload *screen =(SEGScreenPayload *)context.payload;
-  SEGGroupPayload *group =(SEGGroupPayload *)context.payload;
-
-  if (self.cachedMarketingCloudId.length) {
+    SEGIdentifyPayload *identify =(SEGIdentifyPayload *)context.payload;
+    SEGTrackPayload *track =(SEGTrackPayload *)context.payload;
+    SEGScreenPayload *screen =(SEGScreenPayload *)context.payload;
+    SEGGroupPayload *group =(SEGGroupPayload *)context.payload;
+  
     NSMutableDictionary *adobeOptions = [NSMutableDictionary new];
 
     if ([context.payload isKindOfClass:[SEGIdentifyPayload class]]){
@@ -369,8 +368,8 @@ NSString *const cachedAdvertisingIdKey = @"syncIntegrationCode";
                                                 }];
         next(newGroupContext);
     }
+    
     return;
-  }
 }
 
 @end
