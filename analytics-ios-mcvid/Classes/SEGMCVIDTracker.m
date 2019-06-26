@@ -58,8 +58,6 @@ NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
 
     //Store advertisingId and marketingCloudId on local storage
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
-    //This is was SEGIDFA() is going under the hood. NSString *idfaString = [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     NSString *segIdfa = SEGIDFA();
     _cachedMarketingCloudId = [defaults stringForKey:@"com.segment.mcvid.marketingCloudId"];
     if (_cachedAdvertisingId == NULL) {
