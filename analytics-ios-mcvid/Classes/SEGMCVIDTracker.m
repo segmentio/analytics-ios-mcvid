@@ -200,7 +200,11 @@ NSString *const syncIntegrationCallType = @"syncIntegrationCode";
     }] resume];
 }
 
-- (NSURL * _Nonnull)createURL:(NSString *_Nonnull)callType integrationCode:(NSString * _Nonnull)integrationCode {
+- (NSURL * _Nonnull)createURL:callType integrationCode:(NSString * _Nonnull)integrationCode {
+    return [self createURL:callType integrationCode:integrationCode userIdentifier:self.cachedAdvertisingId];
+}
+
+- (NSURL * _Nonnull)createURL:(NSString *_Nonnull)callType integrationCode:(NSString * _Nonnull)integrationCode userIdentifier:(NSString* _Nullable)userIdentifier {
     //Variables to build URL for GET request
     NSString *protocol = @"https";
     NSString *host = @"dpm.demdex.net";
@@ -232,7 +236,7 @@ NSString *const syncIntegrationCallType = @"syncIntegrationCode";
 
     if ([callType isEqualToString:@"syncIntegrationCode"]) {
         [queryItems addObject:[NSURLQueryItem queryItemWithName:marketingCloudIdKey value:self.cachedMarketingCloudId]];
-        NSString *encodedAdvertisingValue = [NSString stringWithFormat:@"%@%@%@", integrationCode, separator, self.cachedAdvertisingId];
+        NSString *encodedAdvertisingValue = [NSString stringWithFormat:@"%@%@%@", integrationCode, separator, userIdentifier];
         //removes %25 html encoding of '%'
         NSString *normalAdvertisingValue = [encodedAdvertisingValue stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         [queryItems addObject:[NSURLQueryItem queryItemWithName:advertisingIdKey value:normalAdvertisingValue]];
