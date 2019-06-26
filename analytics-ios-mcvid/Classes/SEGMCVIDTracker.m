@@ -63,9 +63,10 @@ NSString *const cachedAdvertisingIdKey = @"syncIntegrationCode";
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *segIdfa = SEGIDFA();
     _cachedMarketingCloudId = [defaults stringForKey:cachedMarketingCloudIdKey];
+    _cachedAdvertisingId = [defaults stringForKey:cachedAdvertisingIdKey];
     if (_cachedAdvertisingId == NULL) {
         [defaults setObject:segIdfa forKey:cachedAdvertisingIdKey];
-        _cachedAdvertisingId = [defaults stringForKey:cachedAdvertisingIdKey];
+        _cachedAdvertisingId = segIdfa;
     }
     //Defaut value for integration code which indicate ios
     NSString *integrationCode = @"DSID_20915";
