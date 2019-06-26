@@ -266,49 +266,48 @@ NSString *const cachedAdvertisingIdKey = @"syncIntegrationCode";
     SEGScreenPayload *screen =(SEGScreenPayload *)context.payload;
     SEGGroupPayload *group =(SEGGroupPayload *)context.payload;
   
-    NSMutableDictionary *adobeOptions = [NSMutableDictionary new];
-
     if ([context.payload isKindOfClass:[SEGIdentifyPayload class]]){
-        if ((identify.integrations != NULL) && ([identify.integrations objectForKey:@"Adobe Analytics"])){
-            NSDictionary *existingAAOptions = identify.integrations[@"Adobe Analytics"];
-            [adobeOptions addEntriesFromDictionary:existingAAOptions];
-            [adobeOptions setObject:self.cachedMarketingCloudId forKey:@"marketingCloudVisitorId"];
-        }
-        
         NSMutableDictionary *integrations = [NSMutableDictionary new];
-        if (identify.integrations != NULL) {
-            NSMutableDictionary *existingIntegrations = [NSMutableDictionary new];
-            [existingIntegrations addEntriesFromDictionary:identify.integrations];
-            [existingIntegrations removeObjectForKey:@"Adobe Analytics"];
-            [integrations addEntriesFromDictionary:existingIntegrations];
-            [integrations setObject:adobeOptions forKey:@"Adobe Analytics"];
+        
+        NSMutableDictionary *adobeOptions = [identify.integrations[@"Adobe Analytics"] mutableCopy];
+        if (!adobeOptions) {
+            adobeOptions = [NSMutableDictionary new];
         }
+        [adobeOptions setObject:self.cachedMarketingCloudId forKey:@"marketingCloudVisitorId"];
+        
+        if (identify.integrations != nil) {
+            NSMutableDictionary *existingIntegrations = [identify.integrations mutableCopy];
+            [existingIntegrations removeObjectForKey:@"AdobeAnalytics"];
+            [integrations addEntriesFromDictionary:existingIntegrations];
+        }
+        [integrations setObject:adobeOptions forKey:@"Adobe Analytics"];
+        
         SEGContext *newIdentifyContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
             ctx.payload = [[SEGIdentifyPayload alloc] initWithUserId:identify.userId
-                                                    anonymousId:identify.anonymousId
-                                                    traits: identify.traits
-                                                    context:identify.context
-                                                    integrations: integrations];
-                                                  }];
-
+                                                         anonymousId:identify.anonymousId
+                                                              traits: identify.traits
+                                                             context:identify.context
+                                                        integrations: integrations];
+        }];
+        
         next(newIdentifyContext);
     }
 
     if ([context.payload isKindOfClass:[SEGTrackPayload class]]){
-        if ((track.integrations != NULL) && ([track.integrations objectForKey:@"Adobe Analytics"])){
-            NSDictionary *existingAAOptions = track.integrations[@"Adobe Analytics"];
-            [adobeOptions addEntriesFromDictionary:existingAAOptions];
-            [adobeOptions setObject:self.cachedMarketingCloudId forKey:@"marketingCloudVisitorId"];
-        }
-        
         NSMutableDictionary *integrations = [NSMutableDictionary new];
-        if (track.integrations != NULL) {
-            NSMutableDictionary *existingIntegrations = [NSMutableDictionary new];
-            [existingIntegrations addEntriesFromDictionary:track.integrations];
-            [existingIntegrations removeObjectForKey:@"Adobe Analytics"];
-            [integrations addEntriesFromDictionary:existingIntegrations];
-            [integrations setObject:adobeOptions forKey:@"Adobe Analytics"];
+        
+        NSMutableDictionary *adobeOptions = [track.integrations[@"Adobe Analytics"] mutableCopy];
+        if (!adobeOptions) {
+            adobeOptions = [NSMutableDictionary new];
         }
+        [adobeOptions setObject:self.cachedMarketingCloudId forKey:@"marketingCloudVisitorId"];
+        
+        if (track.integrations != nil) {
+            NSMutableDictionary *existingIntegrations = [track.integrations mutableCopy];
+            [existingIntegrations removeObjectForKey:@"AdobeAnalytics"];
+            [integrations addEntriesFromDictionary:existingIntegrations];
+        }
+        [integrations setObject:adobeOptions forKey:@"Adobe Analytics"];
 
         SEGContext *newTrackContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
           ctx.payload = [[SEGTrackPayload alloc] initWithEvent:track.event
@@ -320,20 +319,20 @@ NSString *const cachedAdvertisingIdKey = @"syncIntegrationCode";
     }
 
     if ([context.payload isKindOfClass:[SEGScreenPayload class]]){
-        if ((screen.integrations != NULL) && ([screen.integrations objectForKey:@"Adobe Analytics"])){
-            NSDictionary *existingAAOptions = screen.integrations[@"Adobe Analytics"];
-            [adobeOptions addEntriesFromDictionary:existingAAOptions];
-            [adobeOptions setObject:self.cachedMarketingCloudId forKey:@"marketingCloudVisitorId"];
-        }
-        
         NSMutableDictionary *integrations = [NSMutableDictionary new];
-        if (screen.integrations != NULL) {
-            NSMutableDictionary *existingIntegrations = [NSMutableDictionary new];
-            [existingIntegrations addEntriesFromDictionary:screen.integrations];
-            [existingIntegrations removeObjectForKey:@"Adobe Analytics"];
-            [integrations addEntriesFromDictionary:existingIntegrations];
-            [integrations setObject:adobeOptions forKey:@"Adobe Analytics"];
+        
+        NSMutableDictionary *adobeOptions = [screen.integrations[@"Adobe Analytics"] mutableCopy];
+        if (!adobeOptions) {
+            adobeOptions = [NSMutableDictionary new];
         }
+        [adobeOptions setObject:self.cachedMarketingCloudId forKey:@"marketingCloudVisitorId"];
+        
+        if (screen.integrations != nil) {
+            NSMutableDictionary *existingIntegrations = [screen.integrations mutableCopy];
+            [existingIntegrations removeObjectForKey:@"AdobeAnalytics"];
+            [integrations addEntriesFromDictionary:existingIntegrations];
+        }
+        [integrations setObject:adobeOptions forKey:@"Adobe Analytics"];
         
         SEGContext *newScreenContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
           ctx.payload = [[SEGScreenPayload alloc] initWithName:screen.name
@@ -345,20 +344,20 @@ NSString *const cachedAdvertisingIdKey = @"syncIntegrationCode";
     }
 
     if ([context.payload isKindOfClass:[SEGGroupPayload class]]){
-        if ((group.integrations != NULL) && ([group.integrations objectForKey:@"Adobe Analytics"])){
-            NSDictionary *existingAAOptions = group.integrations[@"Adobe Analytics"];
-            [adobeOptions addEntriesFromDictionary:existingAAOptions];
-            [adobeOptions setObject:self.cachedMarketingCloudId forKey:@"marketingCloudVisitorId"];
-        }
-        
         NSMutableDictionary *integrations = [NSMutableDictionary new];
-        if (group.integrations != NULL) {
-            NSMutableDictionary *existingIntegrations = [NSMutableDictionary new];
-            [existingIntegrations addEntriesFromDictionary:group.integrations];
-            [existingIntegrations removeObjectForKey:@"Adobe Analytics"];
-            [integrations addEntriesFromDictionary:existingIntegrations];
-            [integrations setObject:adobeOptions forKey:@"Adobe Analytics"];
+        
+        NSMutableDictionary *adobeOptions = [group.integrations[@"Adobe Analytics"] mutableCopy];
+        if (!adobeOptions) {
+            adobeOptions = [NSMutableDictionary new];
         }
+        [adobeOptions setObject:self.cachedMarketingCloudId forKey:@"marketingCloudVisitorId"];
+        
+        if (group.integrations != nil) {
+            NSMutableDictionary *existingIntegrations = [group.integrations mutableCopy];
+            [existingIntegrations removeObjectForKey:@"AdobeAnalytics"];
+            [integrations addEntriesFromDictionary:existingIntegrations];
+        }
+        [integrations setObject:adobeOptions forKey:@"Adobe Analytics"];
         
         SEGContext *newGroupContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
           ctx.payload = [[SEGGroupPayload alloc] initWithGroupId:group.groupId
