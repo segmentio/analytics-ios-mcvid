@@ -30,7 +30,6 @@ NSString *const syncIntegrationCallType = @"syncIntegrationCode";
 @interface SEGMCVIDTracker()
     @property(nonatomic) NSUInteger maxRetryCount;
     @property(nonatomic) NSUInteger currentRetryCount;
-    @property(nonatomic) NSUInteger maxRetryTimeSecs;
     @property(nonatomic, nonnull) NSString *cachedMarketingCloudId;
     @property(nonatomic, nonnull) NSString *cachedAdvertisingId;
     @property dispatch_queue_t _Nonnull backgroundQueue;
@@ -54,7 +53,6 @@ NSString *const syncIntegrationCallType = @"syncIntegrationCode";
     //Values for exponential backoff retry logic for API calls
     _maxRetryCount = 11;
     _currentRetryCount = 1;
-    _maxRetryTimeSecs = 300;
     self.backgroundQueue = dispatch_queue_create("com.segment.mcvid", NULL);
 
 
