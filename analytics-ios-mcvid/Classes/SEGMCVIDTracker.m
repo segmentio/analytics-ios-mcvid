@@ -141,8 +141,7 @@ NSString *const syncIntegrationCallType = @"syncIntegrationCode";
             dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * secondsToWait);
             dispatch_after(delay, self.backgroundQueue, ^(void){
                 self.currentRetryCount = self.currentRetryCount + 1;
-                [self getMarketingCloudId:organizationId completion:^(NSString * _Nullable marketingCloudId, NSError * _Nullable error) {
-                }];
+                [self getMarketingCloudId:organizationId completion:completion];
             });
         }
     }] resume];
