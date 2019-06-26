@@ -200,7 +200,7 @@ NSString *const syncIntegrationCallType = @"syncIntegrationCode";
     }] resume];
 }
 
-- (NSURL * _Nonnull)createURL:callType integrationCode:(NSString * _Nonnull)integrationCode {
+- (NSURL * _Nonnull)createURL:(NSString *_Nonnull)callType integrationCode:(NSString * _Nonnull)integrationCode {
     //Variables to build URL for GET request
     NSString *protocol = @"https";
     NSString *host = @"dpm.demdex.net";
