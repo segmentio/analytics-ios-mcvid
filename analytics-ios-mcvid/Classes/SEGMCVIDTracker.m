@@ -6,6 +6,8 @@
 #include <math.h>
 
 NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
+NSString *const getCloudIdCallType = @"getMarketingCloudID";
+NSString *const syncIntegrationCallType = @"syncIntegrationCode";
 
 @interface MCVIDAdobeError ()
 
@@ -96,9 +98,7 @@ NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
     NSString *errorDomain = @"Segment-Adobe";
     NSString *marketingCloudIdKey = @"d_mid";
 
-    NSString *callType = @"getmMarketingCloudId";
-
-    NSURL *url = [self createURL:callType integrationCode:@"DSID_20915"];
+    NSURL *url = [self createURL:getCloudIdCallType integrationCode:@"DSID_20915"];
 
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
@@ -153,9 +153,8 @@ NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
     //Response and error handling variables
     NSString *errorResponseKey = @"errors";
     NSString *errorDomain = @"Segment-Adobe";
-    NSString *callType =@"syncIntegrationCode";
 
-    NSURL *url = [self createURL:callType integrationCode:integrationCode];
+    NSURL *url = [self createURL:syncIntegrationCallType integrationCode:integrationCode];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:config];
