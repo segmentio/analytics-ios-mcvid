@@ -45,26 +45,26 @@ describe(@"SEGMCVID", ^{
         
     });
     
-    it(@"should properly update the cachedMarketingCloudID", ^{
+    it(@"should have nil cachedMarketingCloudID on clean install", ^{
         NSString *cachedMarketingCloudId = instance.cachedMarketingCloudId;
-        expect(cachedMarketingCloudId).to.equal(@"28682618302214414870104420606205106680");
+        expect(cachedMarketingCloudId).to.beNil();
     });
     
     it(@"should properly update the cachedAdvertisingId", ^{
         NSString *cachedAdvertisingId = instance.cachedAdvertisingId;
-        expect(cachedAdvertisingId).to.equal(@"34629D8C-7B4F-4947-8E22-F1CC625889E5");
+        expect(cachedAdvertisingId).willNot.beNil();
     });
     
-    it(@"should properly store the cachedMarketingCloudId in NSUserDefaults", ^{
+    it(@"should have nil value for cachedMarketingCloudId in NSUserDefaults on clean install", ^{
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         NSString *storedMarketingCloudId = [defaults stringForKey:@"com.segment.mcvid.marketingCloudId"];
-        expect(storedMarketingCloudId).to.equal(@"28682618302214414870104420606205106680");
+        expect(storedMarketingCloudId).to.beNil();
     });
     
     it(@"should properly store the cachedAdvertisingId in NSUserDefaults", ^{
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         NSString *storedAdvertisingId = [defaults stringForKey:@"com.segment.mcvid.advertisingId"];
-        expect(storedAdvertisingId).to.equal(@"34629D8C-7B4F-4947-8E22-F1CC625889E5");
+        expect(storedAdvertisingId).willNot.beNil();
     });
     
     it(@"can make basic identify calls", ^{
@@ -112,9 +112,10 @@ describe(@"createURL function", ^{
         NSString const *syncIntegrationCallType = @"syncIntegrationCode";
         NSURL *url = [instance createURL:syncIntegrationCallType integrationCode:@"DSID_20915"];
         NSString *urlString = url.absoluteString;
+        NSString *expected = [NSString stringWithFormat:@"%@%@", @"01", instance.cachedAdvertisingId];
+        NSString *actual = [[urlString componentsSeparatedByString:@"%"] objectAtIndex:1];
         
-        NSString *expected = @"https://dpm.demdex.net/id?d_ver=2&d_rtbd=json&dcs_region=6&d_orgid=B3CB46FC57C6C8F77F000101@AdobeOrg&d_mid=28682618302214414870104420606205106680&d_cid_ic=DSID_20915%0134629D8C-7B4F-4947-8E22-F1CC625889E5";
-        expect(urlString).to.equal(expected);
+        expect(actual).to.equal(expected);
     });
 
     it(@"can properly create the getMarketingCloudId url", ^{
@@ -142,6 +143,9 @@ describe(@"buildIntegrationObject Function", ^{
         configuration.trackApplicationLifecycleEvents = YES;
         [SEGAnalytics setupWithConfiguration:configuration];
         instance = [[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region];
+        [[SEGAnalytics sharedAnalytics] track:@"Product Rated"
+                                   properties:nil
+                                      options:@{ @"integrations": @{ @"All": @YES, @"Mixpanel": @NO }}];
     });
     
     it(@"properly updates an empty integrations object with the marketingCloudId", ^{
