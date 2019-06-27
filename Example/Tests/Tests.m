@@ -143,19 +143,6 @@ describe(@"buildIntegrationObject Function", ^{
         configuration.trackApplicationLifecycleEvents = YES;
         [SEGAnalytics setupWithConfiguration:configuration];
         instance = [[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region];
-        [[SEGAnalytics sharedAnalytics] track:@"Product Rated"
-                                   properties:nil
-                                      options:@{ @"integrations": @{ @"All": @YES, @"Mixpanel": @NO }}];
-    });
-    
-    it(@"properly updates an empty integrations object with the marketingCloudId", ^{
-        NSDictionary *context = [[NSDictionary alloc] initWithObjectsAndKeys:
-                                 @"Item Purchased", @"event", @{ @"item": @"Sword of Heracles", @"revenue": @2.95 }, @"properties", nil];
-        NSDictionary *exisintgIntegrations = [NSDictionary new];
-        SEGPayload *payload = [[SEGPayload alloc] initWithContext:context integrations:exisintgIntegrations];
-        NSMutableDictionary *integrations = [instance buildIntegrationsObject:payload];
-        NSString *marketingCloudId = integrations[@"Adobe Analytics"][@"marketingCloudVisitorId"];
-        expect(marketingCloudId).to.equal(instance.cachedMarketingCloudId);
     });
     
     it(@"updates an empty integrations object with one k/v pair", ^{
