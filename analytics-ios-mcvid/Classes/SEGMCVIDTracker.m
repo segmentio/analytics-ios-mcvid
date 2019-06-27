@@ -8,8 +8,8 @@
 NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
 NSString *const getCloudIdCallType = @"getMarketingCloudID";
 NSString *const syncIntegrationCallType = @"syncIntegrationCode";
-NSString *const cachedMarketingCloudIdKey = @"syncIntegrationCode";
-NSString *const cachedAdvertisingIdKey = @"syncIntegrationCode";
+NSString *const cachedMarketingCloudIdKey = @"com.segment.mcvid.marketingCloudId";
+NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
 
 
 @interface MCVIDAdobeError ()
