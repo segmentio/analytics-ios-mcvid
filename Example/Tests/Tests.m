@@ -143,9 +143,6 @@ describe(@"buildIntegrationObject Function", ^{
         configuration.trackApplicationLifecycleEvents = YES;
         [SEGAnalytics setupWithConfiguration:configuration];
         instance = [[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region];
-        [[SEGAnalytics sharedAnalytics] track:@"Product Rated"
-                                   properties:nil
-                                      options:@{ @"integrations": @{ @"All": @YES, @"Mixpanel": @NO }}];
     });
     
     it(@"will not set marketingCloudVisitorId on clean install and not block events", ^{
@@ -154,8 +151,8 @@ describe(@"buildIntegrationObject Function", ^{
         NSDictionary *exisintgIntegrations = [NSDictionary new];
         SEGPayload *payload = [[SEGPayload alloc] initWithContext:context integrations:exisintgIntegrations];
         NSMutableDictionary *integrations = [instance buildIntegrationsObject:payload];
-        NSString *marketingCloudId = integrations[@"Adobe Analytics"][@"marketingCloudVisitorId"];
-        expect(marketingCloudId).to.beNil();
+        NSInteger count = [integrations count];
+        expect(count).to.equal(0);
     });
     
     it(@"properly updates an empty integrations object with the marketingCloudId", ^{
