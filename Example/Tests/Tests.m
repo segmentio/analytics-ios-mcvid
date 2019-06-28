@@ -143,6 +143,9 @@ describe(@"buildIntegrationObject Function", ^{
         configuration.trackApplicationLifecycleEvents = YES;
         [SEGAnalytics setupWithConfiguration:configuration];
         instance = [[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region];
+        [[SEGAnalytics sharedAnalytics] track:@"Product Rated"
+                                   properties:nil
+                                      options:@{ @"integrations": @{ @"All": @YES, @"Mixpanel": @NO }}];
     });
     
     it(@"properly updates an integrations object with other integration specific options with the marketingCloudId", ^{
@@ -152,7 +155,7 @@ describe(@"buildIntegrationObject Function", ^{
         SEGPayload *payload = [[SEGPayload alloc] initWithContext:context integrations:exisintgIntegrations];
         NSMutableDictionary *integrations = [instance buildIntegrationsObject:payload];
         NSString *marketingCloudId = integrations[@"Adobe Analytics"][@"marketingCloudVisitorId"];
-        expect(marketingCloudId).to.equal(instance.cachedMarketingCloudId);
+        expect(marketingCloudId).willNot.beNil();
     });
     
     it(@"properly updates an integrations object with other integration specific options with the marketingCloudId", ^{
