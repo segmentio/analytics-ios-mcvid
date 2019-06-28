@@ -145,16 +145,6 @@ describe(@"buildIntegrationObject Function", ^{
         instance = [[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region];
     });
     
-    it(@"updates an empty integrations object with one k/v pair", ^{
-        NSDictionary *context = [[NSDictionary alloc] initWithObjectsAndKeys:
-                                 @"Item Purchased", @"event", @{ @"item": @"Sword of Heracles", @"revenue": @2.95 }, @"properties", nil];
-        NSDictionary *exisintgIntegrations = [NSDictionary new];
-        SEGPayload *payload = [[SEGPayload alloc] initWithContext:context integrations:exisintgIntegrations];
-        NSMutableDictionary *integrations = [instance buildIntegrationsObject:payload];
-        NSInteger count = [integrations count];
-        expect(count).to.equal(1);
-    });
-    
     it(@"properly updates an integrations object with other integration specific options with the marketingCloudId", ^{
         NSDictionary *context = [[NSDictionary alloc] initWithObjectsAndKeys:
                                  @"Item Purchased", @"event", @{ @"item": @"Sword of Heracles", @"revenue": @2.95 }, @"properties", nil];
