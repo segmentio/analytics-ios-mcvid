@@ -116,4 +116,83 @@ describe(@"createURL function", ^{
         expect(urlString).to.equal(expected);
     });
 });
+
+describe(@"buildIntegrationObject Function", ^{
+    __block NSString *organizationId;
+    __block NSString *region;
+    __block SEGAnalyticsConfiguration *configuration;
+    __block SEGMCVIDTracker *instance;
+
+
+    beforeAll(^{
+        configuration =  [SEGAnalyticsConfiguration configurationWithWriteKey:@"some_write_key"];
+        organizationId = @"B3CB46FC57C6C8F77F000101@AdobeOrg";
+        region = @"6";
+        configuration.middlewares = @[[[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region]];
+        configuration.trackApplicationLifecycleEvents = YES;
+        [SEGAnalytics setupWithConfiguration:configuration];
+        instance = [[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region];
+        instance.cachedMarketingCloudId = @"12345678910";
+    });
+
+    it(@"properly updates an empty integrations object with the marketingCloudId", ^{
+        NSDictionary *context = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                 @"Item Purchased", @"event", @{ @"item": @"Sword of Heracles", @"revenue": @2.95 }, @"properties", nil];
+        NSDictionary *exisintgIntegrations = [NSDictionary new];
+        SEGPayload *payload = [[SEGPayload alloc] initWithContext:context integrations:exisintgIntegrations];
+        NSMutableDictionary *integrations = [instance buildIntegrationsObject:payload];
+        NSString *marketingCloudId = integrations[@"Adobe Analytics"][@"marketingCloudVisitorId"];
+        expect(marketingCloudId).to.equal(instance.cachedMarketingCloudId);
+    });
+
+    it(@"updates an empty integrations object with one k/v pair", ^{
+        NSDictionary *context = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                 @"Item Purchased", @"event", @{ @"item": @"Sword of Heracles", @"revenue": @2.95 }, @"properties", nil];
+        NSDictionary *exisintgIntegrations = [NSDictionary new];
+        SEGPayload *payload = [[SEGPayload alloc] initWithContext:context integrations:exisintgIntegrations];
+        NSMutableDictionary *integrations = [instance buildIntegrationsObject:payload];
+        NSInteger count = [integrations count];
+        expect(count).to.equal(1);
+    });
+
+    it(@"properly updates an integrations object with other integration specific options with the marketingCloudId", ^{
+        NSDictionary *context = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                 @"Item Purchased", @"event", @{ @"item": @"Sword of Heracles", @"revenue": @2.95 }, @"properties", nil];
+        NSDictionary *exisintgIntegrations = [[NSDictionary alloc] initWithObjectsAndKeys: @NO, @"Mixpanel", nil];
+        SEGPayload *payload = [[SEGPayload alloc] initWithContext:context integrations:exisintgIntegrations];
+        NSMutableDictionary *integrations = [instance buildIntegrationsObject:payload];
+        NSString *marketingCloudId = integrations[@"Adobe Analytics"][@"marketingCloudVisitorId"];
+        expect(marketingCloudId).to.equal(instance.cachedMarketingCloudId);
+    });
+
+    it(@"properly updates an integrations object with other integration specific options with the marketingCloudId", ^{
+        NSDictionary *context = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                 @"Item Purchased", @"event", @{ @"item": @"Sword of Heracles", @"revenue": @2.95 }, @"properties", nil];
+        NSDictionary *exisintgIntegrations = [[NSDictionary alloc] initWithObjectsAndKeys: @NO, @"Mixpanel", nil];
+        SEGPayload *payload = [[SEGPayload alloc] initWithContext:context integrations:exisintgIntegrations];
+        NSMutableDictionary *integrations = [instance buildIntegrationsObject:payload];
+        NSInteger count = [integrations count];
+        expect(count).to.equal(2);
+    });
+
+    it(@"properly updates the AA integrations object with the marketingCloudId without overriding existing options", ^{
+        NSDictionary *context = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                 @"Item Purchased", @"event", @{ @"item": @"Sword of Heracles", @"revenue": @2.95 }, @"properties", nil];
+        NSDictionary *exisintgIntegrations = [[NSDictionary alloc] initWithObjectsAndKeys: @NO, @"Mixpanel", @{ @"prop1": @"hello world"}, @"Adobe Analytics", nil];
+        SEGPayload *payload = [[SEGPayload alloc] initWithContext:context integrations:exisintgIntegrations];
+        NSMutableDictionary *integrations = [instance buildIntegrationsObject:payload];
+        NSString *marketingCloudId = integrations[@"Adobe Analytics"][@"marketingCloudVisitorId"];
+        expect(marketingCloudId).to.equal(instance.cachedMarketingCloudId);
+    });
+
+    it(@"properly updates the AA integrations object with the marketingCloudId without overriding existing options", ^{
+        NSDictionary *context = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                 @"Item Purchased", @"event", @{ @"item": @"Sword of Heracles", @"revenue": @2.95 }, @"properties", nil];
+        NSDictionary *exisintgIntegrations = [[NSDictionary alloc] initWithObjectsAndKeys: @NO, @"Mixpanel", @{ @"prop1": @"hello world"}, @"Adobe Analytics", nil];
+        SEGPayload *payload = [[SEGPayload alloc] initWithContext:context integrations:exisintgIntegrations];
+        NSMutableDictionary *integrations = [instance buildIntegrationsObject:payload];
+        NSInteger count = [integrations count];
+        expect(count).to.equal(2);
+    });
+});
 SpecEnd
