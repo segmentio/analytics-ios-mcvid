@@ -19,7 +19,7 @@
     SEGAnalyticsConfiguration *configuration = [SEGAnalyticsConfiguration configurationWithWriteKey:@"YOUR_WRITE_KEY"];
 
     // Configure the client with the MCVID middleware. Intiliaze with your Adobe OrgId and Adobe Region (ie. dcs_region key)
-    configuration.middlewares = @[ [[SEGMCVIDTracker alloc]  initWithOrganizationId:@"YOUR_ADOBE_ORGID@AdobeOrg" region:@"YOUR_REGION_HERE"] ];
+    configuration.middlewares = @[ [[SEGMCVIDTracker alloc]  initWithOrganizationId:@"YOUR_ORD_ID@AdobeOrg" region:@"YOUR_REGION_KEY"] ];
     configuration.trackApplicationLifecycleEvents = YES; // Enable this to record certain application events automatically!
     configuration.recordScreenViews = YES; // Enable this to record screen views automatically!
     configuration.flushAt = 1; // Flush events to Segment every 1 event
@@ -29,14 +29,18 @@
     [[SEGAnalytics sharedAnalytics] identify:@"user12345"
                                traits:@{ @"email": @"test@test.com" }];
 
-    [NSThread sleepForTimeInterval:5.0f];
-
    [[SEGAnalytics sharedAnalytics] track:@"Item Purchased"
                               properties:@{ @"item": @"Sword of Heracles", @"revenue": @2.95 }];
 
-    [NSThread sleepForTimeInterval:5.0f];
-
     [[SEGAnalytics sharedAnalytics] identify:@"Testing Adobe Analytics"];
+
+    [[SEGAnalytics sharedAnalytics] track:@"Product Rated"
+                           properties:nil
+                              options:@{ @"integrations": @{ @"All": @YES, @"Mixpanel": @NO }}];
+
+      [[SEGAnalytics sharedAnalytics] track:@"Product Removed"
+                             properties:nil
+                                options:@{ @"integrations": @{ @"All": @YES, @"Mixpanel": @NO, @"Adobe Analytics":@{ @"prop1":@"Hello World"} }}];
 
     return YES;
 }

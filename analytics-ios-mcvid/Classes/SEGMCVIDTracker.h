@@ -1,26 +1,21 @@
 #import <Foundation/Foundation.h>
 #import <Analytics/SEGMiddleware.h>
 
-
 @interface SEGMCVIDTracker : NSObject <SEGMiddleware>
 
--(id)initWithOrganizationId:(NSString *)organizationId region:(NSString *)region;
+-(id _Nonnull)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region;
 
-@property (nonatomic, strong) NSString *organizationId;
-@property (nonatomic, strong) NSString *region;
-@property(readonly, copy) NSString *stringByRemovingPercentEncoding;
-@property(nonatomic, strong) NSString *staticMarketingCloudId;
+@property (nonatomic, strong, nonnull) NSString *organizationId;
+@property (nonatomic, strong, nonnull) NSString *region;
 
-- (void) sendRequestAdobeExperienceCloud:(NSString *)advertiserId organizationId:(NSString *)organizationId completion:(void (^)(NSString *marketingCloudIdKey, NSError *))completion;
+- (void)syncIntegrationCode:(NSString *_Nonnull)integrationCode userIdentifier:(NSString *_Nonnull)userIdentifier completion:(void (^_Nonnull)(NSError *_Nullable))completion;
 
 @end
 
 // Use this key to retrieve the MCVIDAdobeError object from the NSError's userInfo dictionary
-extern NSString *const MCVIDAdobeErrorKey;
+extern NSString * _Nonnull const MCVIDAdobeErrorKey;
 
 typedef NS_ENUM(NSInteger, MCVIDAdobeErrorCode) {
-    // Network request failed
-    MCVIDAdobeErrorCodeClientFailedRequestError,
     // Unable to deserialize JSON from response
     MCVIDAdobeErrorCodeClientSerializationError,
     // An error was provided by the server
@@ -30,7 +25,7 @@ typedef NS_ENUM(NSInteger, MCVIDAdobeErrorCode) {
 @interface MCVIDAdobeError : NSObject
 
 @property (nonatomic, assign) MCVIDAdobeErrorCode code;
-@property (nonatomic) NSString *message;
-@property (nonatomic) NSError *innerError;
+@property (nonatomic, nullable) NSString *message;
+@property (nonatomic, nullable) NSError *innerError;
 
 @end
