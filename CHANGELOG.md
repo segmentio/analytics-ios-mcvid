@@ -1,7 +1,10 @@
 Change Log
 ==========
+Version 1.0.2 *(1st July, 2019)*
+-------------------------------------
+* Adds additional unit tests for buildIntegrationsObject.
 
-Version 1.0.1 *(18th April, 2019)*
+Version 1.0.1 *(1st July, 2019)*
 -------------------------------------
 * Adds ID and Sync calls to the constructor of the middleware. Note: it will getMarketingCloudId and then syncIntegrationCode if we don't have a cachedMarketingCloudId. Otherwise it will syncIntegrationCode with the cachedMarketingCloudId if the advertisingId has changed.
 * Stores the advertisingID and marketingCloudId in iOS local storage (NSUserDefaults)
