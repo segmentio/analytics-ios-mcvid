@@ -13,6 +13,7 @@
 #import <Analytics/SEGAnalytics.h>
 #import "SEGAppDelegate.h"
 #import "SEGPayload.h"
+#import "SEGMiddlewareSpy.h"
 
 // https://github.com/Specta/Specta
 @interface SEGMCVIDTracker (Testing)
@@ -77,7 +78,21 @@ describe(@"SEGMCVID", ^{
                                    properties:nil
                                       options:@{ @"integrations": @{ @"All": @YES, @"Mixpanel": @NO, @"Adobe Analytics":@{ @"prop1":@"Hello World"} }}];
     });
-    
+
+    it(@"ignores non track events", ^{
+        SEGMCVIDTracker *mcvid = [[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region];
+        SEGMiddlewareSpy *spy = [[SEGMiddlewareSpy alloc] init];
+
+        SEGAnalyticsConfiguration *configuration =  [SEGAnalyticsConfiguration configurationWithWriteKey:@"some_write_key"];
+        configuration.middlewares = @[mcvid, spy];
+
+        SEGAnalytics *analytics = [[SEGAnalytics alloc] initWithConfiguration:configuration];
+
+        [mcvid setValue:@"fake" forKey:@"cachedMarketingCloudId"];
+        [analytics flush];
+
+        expect(spy.lastEventType).will.equal(SEGEventTypeFlush);
+    });
 });
 
 describe(@"createURL function", ^{
