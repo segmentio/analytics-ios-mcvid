@@ -39,10 +39,6 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
 
 @implementation SEGMCVIDTracker
 
-+ (id<SEGMiddleware>)middlewareWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region {
-    return [[SEGMCVIDTracker alloc] initWithOrganizationId: organizationId region:region ];
-}
-
 -(id)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region
   {
     if (self = [super init])
