@@ -270,36 +270,16 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
 
 
 - (void)context:(SEGContext *_Nonnull)context next:(SEGMiddlewareNext _Nonnull)next {
-    if ([context.payload isKindOfClass:[SEGAliasPayload class]]) {
-        next(context);
-        return;
-    }
-    
+    // If we still don't have a marketing cloud visitor ID we can't inject it
     if (self.cachedMarketingCloudId.length == 0) {
         next(context);
         return;
     }
 
-    SEGIdentifyPayload *identify =(SEGIdentifyPayload *)context.payload;
-    SEGTrackPayload *track =(SEGTrackPayload *)context.payload;
-    SEGScreenPayload *screen =(SEGScreenPayload *)context.payload;
-    SEGGroupPayload *group =(SEGGroupPayload *)context.payload;
-  
-    if ([context.payload isKindOfClass:[SEGIdentifyPayload class]]){
-        NSMutableDictionary *integrations = [self buildIntegrationsObject:identify];
-        
-        SEGContext *newIdentifyContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
-            ctx.payload = [[SEGIdentifyPayload alloc] initWithUserId:identify.userId
-                                                         anonymousId:identify.anonymousId
-                                                              traits: identify.traits
-                                                             context:identify.context
-                                                        integrations: integrations];
-        }];
-        
-        next(newIdentifyContext);
-    }
+    SEGContext *updatedContext = context;
 
-    if ([context.payload isKindOfClass:[SEGTrackPayload class]]){
+    if ([context.payload isKindOfClass:[SEGTrackPayload class]]) {
+        SEGTrackPayload *track = (SEGTrackPayload *)context.payload;
         NSMutableDictionary *integrations = [self buildIntegrationsObject:track];
         
         SEGContext *newTrackContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
@@ -308,10 +288,11 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
                                                     context:track.context
                                                     integrations: integrations];
                                                   }];
-        next(newTrackContext);
+        updatedContext = newTrackContext;
     }
 
-    if ([context.payload isKindOfClass:[SEGScreenPayload class]]){
+    if ([context.payload isKindOfClass:[SEGScreenPayload class]]) {
+        SEGScreenPayload *screen = (SEGScreenPayload *)context.payload;
         NSMutableDictionary *integrations = [self buildIntegrationsObject:screen];
         
         SEGContext *newScreenContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
@@ -320,21 +301,10 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
                                                   context:screen.context
                                                   integrations: integrations];
                                                 }];
-        next(newScreenContext);
+        updatedContext = newScreenContext;
     }
 
-    if ([context.payload isKindOfClass:[SEGGroupPayload class]]){
-        NSMutableDictionary *integrations = [self buildIntegrationsObject:group];
-                
-        SEGContext *newGroupContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
-          ctx.payload = [[SEGGroupPayload alloc] initWithGroupId:group.groupId
-                                                  traits: group.traits
-                                                  context:group.context
-                                                  integrations: integrations];
-                                                }];
-        next(newGroupContext);
-    }
-    
+    next(updatedContext);
     return;
 }
 
