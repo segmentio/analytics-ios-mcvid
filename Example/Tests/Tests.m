@@ -18,12 +18,13 @@
 // https://github.com/Specta/Specta
 @interface SEGMCVIDTracker (Testing)
 
-- (NSURL * _Nonnull)createURL:callType integrationCode:(NSString * _Nonnull)integrationCode;
+- (NSURL * _Nonnull)createURLWithAdditionalQueryItems:(NSArray<NSURLQueryItem *>* _Nullable)extraQueryItems;
+- (NSArray<NSURLQueryItem *>* _Nonnull)URLQueryItemsForIntegrationCode:(NSString * _Nonnull)integrationCode userIdentifier:(NSString* _Nonnull)userIdentifier;
 - (NSMutableDictionary * _Nonnull)buildIntegrationsObject:(SEGPayload *_Nonnull)payload;
+
 @property(nonatomic, nonnull) NSString *cachedMarketingCloudId;
 @property(nonatomic, nonnull) NSString *cachedAdvertisingId;
 @property(nonatomic) NSUInteger currentRetryCount;
-
 
 @end
 
@@ -36,6 +37,11 @@ describe(@"SEGMCVID", ^{
     __block SEGMCVIDTracker *instance;
     
     beforeEach(^{
+        // Clean existing user defaults
+        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        [defaults removeObjectForKey:@"com.segment.mcvid.marketingCloudId"];
+        [defaults removeObjectForKey:@"com.segment.mcvid.advertisingId"];
+
         configuration =  [SEGAnalyticsConfiguration configurationWithWriteKey:@"some_write_key"];
         organizationId = @"B3CB46FC57C6C8F77F000101@AdobeOrg";
         region = @"6";
@@ -113,18 +119,16 @@ describe(@"createURL function", ^{
     });
 
     it(@"can properly create the synIntegrationCode url", ^{
-        NSString const *syncIntegrationCallType = @"syncIntegrationCode";
-        NSURL *url = [instance createURL:syncIntegrationCallType integrationCode:@"DSID_20915"];
+        NSArray *queryItems = [instance URLQueryItemsForIntegrationCode:@"integration_code" userIdentifier:@"user_id"];
+        NSURL *url = [instance createURLWithAdditionalQueryItems:queryItems];
         NSString *urlString = url.absoluteString;
-        NSString *expected = [NSString stringWithFormat:@"%@%@", @"01", instance.cachedAdvertisingId];
-        NSString *actual = [[urlString componentsSeparatedByString:@"%"] objectAtIndex:1];
-        
-        expect(actual).to.equal(expected);
+
+        expect([urlString rangeOfString:@"d_cid_ic=integration_code%01user_id"].location).toNot.equal(NSNotFound);
+        expect([urlString rangeOfString:@"d_mid"].location).toNot.equal(NSNotFound);
     });
 
     it(@"can properly create the getMarketingCloudId url", ^{
-        NSString const *getCloudIdCallType = @"getMarketingCloudID";
-        NSURL *url = [instance createURL:getCloudIdCallType integrationCode:@"DSID_20915"];
+        NSURL *url = [instance createURLWithAdditionalQueryItems:nil];
         NSString *urlString = url.absoluteString;
         
         NSString *expected = @"https://dpm.demdex.net/id?d_ver=2&d_rtbd=json&dcs_region=6&d_orgid=B3CB46FC57C6C8F77F000101@AdobeOrg";
