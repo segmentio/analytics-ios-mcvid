@@ -260,20 +260,20 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
 
 - (NSMutableDictionary * _Nonnull)buildIntegrationsObject:(SEGPayload *_Nonnull)payload {
     NSMutableDictionary *integrations = [NSMutableDictionary new];
-    
+
     NSMutableDictionary *adobeOptions = [payload.integrations[@"Adobe Analytics"] mutableCopy];
     if (!adobeOptions) {
         adobeOptions = [NSMutableDictionary new];
     }
     [adobeOptions setObject:self.cachedMarketingCloudId forKey:@"marketingCloudVisitorId"];
-    
+
     if (payload.integrations != nil) {
         NSMutableDictionary *existingIntegrations = [payload.integrations mutableCopy];
         [existingIntegrations removeObjectForKey:@"AdobeAnalytics"];
         [integrations addEntriesFromDictionary:existingIntegrations];
     }
     [integrations setObject:adobeOptions forKey:@"Adobe Analytics"];
-    
+
     return integrations;
 }
 
@@ -290,7 +290,7 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
     if ([context.payload isKindOfClass:[SEGTrackPayload class]]) {
         SEGTrackPayload *track = (SEGTrackPayload *)context.payload;
         NSMutableDictionary *integrations = [self buildIntegrationsObject:track];
-        
+
         SEGContext *newTrackContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
           ctx.payload = [[SEGTrackPayload alloc] initWithEvent:track.event
                                                     properties:track.properties
@@ -299,11 +299,26 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
                                                   }];
         updatedContext = newTrackContext;
     }
+    
+    if ([context.payload isKindOfClass:[SEGIdentifyPayload class]]){
+        SEGIdentifyPayload *identify= (SEGIdentifyPayload *)context.payload;
+        NSMutableDictionary *integrations = [self buildIntegrationsObject:identify];
+        
+        SEGContext *newIdentifyContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
+            ctx.payload = [[SEGIdentifyPayload alloc] initWithUserId:identify.userId
+                                                         anonymousId:identify.anonymousId
+                                                              traits: identify.traits
+                                                             context:identify.context
+                                                        integrations: integrations];
+        }];
+        
+        updatedContext = newIdentifyContext;
+    }
 
     if ([context.payload isKindOfClass:[SEGScreenPayload class]]) {
         SEGScreenPayload *screen = (SEGScreenPayload *)context.payload;
         NSMutableDictionary *integrations = [self buildIntegrationsObject:screen];
-        
+
         SEGContext *newScreenContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
           ctx.payload = [[SEGScreenPayload alloc] initWithName:screen.name
                                                   properties:screen.properties
@@ -311,6 +326,20 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
                                                   integrations: integrations];
                                                 }];
         updatedContext = newScreenContext;
+    }
+    
+    if ([context.payload isKindOfClass:[SEGGroupPayload class]]){
+        SEGGroupPayload *group = (SEGGroupPayload *)context.payload;
+        NSMutableDictionary *integrations = [self buildIntegrationsObject:group];
+        
+        SEGContext *newGroupContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
+            ctx.payload = [[SEGGroupPayload alloc] initWithGroupId:group.groupId
+                                                            traits: group.traits
+                                                           context:group.context
+                                                      integrations: integrations];
+        }];
+        
+        updatedContext = newGroupContext;
     }
 
     next(updatedContext);
