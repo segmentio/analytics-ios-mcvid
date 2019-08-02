@@ -1,5 +1,12 @@
 Change Log
 ==========
+Version 1.2.0 *(1st July, 2019)*
+-------------------------------------
+* Ensures middleware doesn't break chain of events by always calling next.
+* Fixes `syncIntegrationCode` method to make useable outside of framework.
+* Ensures SEGMCVIDTracker is property initialized.
+* Avoids performing an idsync if no MCVID is available. 
+
 Version 1.0.2 *(1st July, 2019)*
 -------------------------------------
 * Adds additional unit tests for buildIntegrationsObject.
