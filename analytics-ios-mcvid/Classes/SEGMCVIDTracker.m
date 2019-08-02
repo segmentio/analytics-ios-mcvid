@@ -6,8 +6,6 @@
 #include <math.h>
 
 NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
-NSString *const getCloudIdCallType = @"getMarketingCloudID";
-NSString *const syncIntegrationCallType = @"syncIntegrationCode";
 NSString *const cachedMarketingCloudIdKey = @"com.segment.mcvid.marketingCloudId";
 NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
 
@@ -40,10 +38,6 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
 @end
 
 @implementation SEGMCVIDTracker
-
-+ (id<SEGMiddleware>)middlewareWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region {
-    return [[SEGMCVIDTracker alloc] initWithOrganizationId: organizationId region:region ];
-}
 
 -(id)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region
   {
@@ -100,7 +94,7 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
     NSString *errorDomain = @"Segment-Adobe";
     NSString *marketingCloudIdKey = @"d_mid";
 
-    NSURL *url = [self createURL:getCloudIdCallType integrationCode:@"DSID_20915"];
+    NSURL *url = [self createURLWithAdditionalQueryItems:nil];
 
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
@@ -151,12 +145,21 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
 }
 
 - (void)syncIntegrationCode:(NSString * _Nonnull)integrationCode userIdentifier:(NSString * _Nonnull)userIdentifier completion:(void (^)(NSError * _Nullable))completion {
-
     //Response and error handling variables
     NSString *errorResponseKey = @"errors";
     NSString *errorDomain = @"Segment-Adobe";
 
-    NSURL *url = [self createURL:syncIntegrationCallType integrationCode:integrationCode];
+    // We cannot perform an idsync if we don't have a MCVID.
+    if (self.cachedMarketingCloudId.length == 0) {
+        NSString *message = @"A MCVID is not yet available. Please, retry the operation later.";
+        MCVIDAdobeError *adobeError = [[MCVIDAdobeError alloc] initWithCode:MCVIDAdobeErrorCodeUnavailable message:message error:nil];
+        NSError *compositeError = [NSError errorWithDomain:errorDomain code:adobeError.code userInfo:@{MCVIDAdobeErrorKey:adobeError}];
+        completion(compositeError);
+        return;
+    }
+
+    NSArray<NSURLQueryItem *>* syncQueryItems = [self URLQueryItemsForIntegrationCode:integrationCode userIdentifier:userIdentifier];
+    NSURL *url = [self createURLWithAdditionalQueryItems:syncQueryItems];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:config];
@@ -202,11 +205,7 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
     }] resume];
 }
 
-- (NSURL * _Nonnull)createURL:(NSString *_Nonnull)callType integrationCode:(NSString * _Nonnull)integrationCode {
-    return [self createURL:callType integrationCode:integrationCode userIdentifier:self.cachedAdvertisingId];
-}
-
-- (NSURL * _Nonnull)createURL:(NSString *_Nonnull)callType integrationCode:(NSString * _Nonnull)integrationCode userIdentifier:(NSString* _Nullable)userIdentifier {
+- (NSURL * _Nonnull)createURLWithAdditionalQueryItems:(NSArray<NSURLQueryItem *>* _Nullable)extraQueryItems {
     //Variables to build URL for GET request
     NSString *protocol = @"https";
     NSString *host = @"dpm.demdex.net";
@@ -219,12 +218,7 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
     NSString *jsonFormatter = @"json";//&d_rtbd and defaults to = json
     NSString *regionKey = @"dcs_region"; //dcs_region key defaults to = 6
     NSString *region = _region; //dcs_region
-    NSString *marketingCloudIdKey = @"d_mid";
     NSString *organizationIdKey = @"d_orgid"; //can retrieve from settings
-
-    //Variables for when advertising Id is present
-    NSString *separator = @"%01";
-    NSString *advertisingIdKey = @"d_cid_ic";
 
     //Values to build URl components and query items
     NSMutableString *urlString = [NSMutableString stringWithFormat:@"%@://%@%@", protocol, host, path];
@@ -236,12 +230,8 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
     [queryItems addObject:[NSURLQueryItem queryItemWithName:regionKey value:region]];
     [queryItems addObject:[NSURLQueryItem queryItemWithName:organizationIdKey value:self.organizationId]];
 
-    if ([callType isEqualToString:@"syncIntegrationCode"]) {
-        [queryItems addObject:[NSURLQueryItem queryItemWithName:marketingCloudIdKey value:self.cachedMarketingCloudId]];
-        NSString *encodedAdvertisingValue = [NSString stringWithFormat:@"%@%@%@", integrationCode, separator, userIdentifier];
-        //removes %25 html encoding of '%'
-        NSString *normalAdvertisingValue = [encodedAdvertisingValue stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        [queryItems addObject:[NSURLQueryItem queryItemWithName:advertisingIdKey value:normalAdvertisingValue]];
+    if (extraQueryItems.count > 0) {
+        [queryItems addObjectsFromArray:extraQueryItems];
     }
     components.queryItems = queryItems;
     NSURL *url = components.URL;
@@ -249,43 +239,69 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
     return url;
 }
 
+- (NSArray<NSURLQueryItem *>* _Nonnull)URLQueryItemsForIntegrationCode:(NSString * _Nonnull)integrationCode userIdentifier:(NSString* _Nonnull)userIdentifier {
+    NSString *marketingCloudIdKey = @"d_mid";
+    NSString *advertisingIdKey = @"d_cid_ic";
+    NSString *separator = @"%01";
+
+    NSMutableArray *queryItems = [NSMutableArray array];
+
+    // d_mid=<marketing_cloud_visitor_id>
+    [queryItems addObject:[NSURLQueryItem queryItemWithName:marketingCloudIdKey value:self.cachedMarketingCloudId]];
+
+    // d_cid_ic=<integration_code>%01<user_identifier>
+    NSString *encodedAdvertisingValue = [NSString stringWithFormat:@"%@%@%@", integrationCode, separator, userIdentifier];
+    //removes %25 html encoding of '%'
+    NSString *normalAdvertisingValue = [encodedAdvertisingValue stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    [queryItems addObject:[NSURLQueryItem queryItemWithName:advertisingIdKey value:normalAdvertisingValue]];
+
+    return queryItems;
+}
+
 - (NSMutableDictionary * _Nonnull)buildIntegrationsObject:(SEGPayload *_Nonnull)payload {
     NSMutableDictionary *integrations = [NSMutableDictionary new];
-    
+
     NSMutableDictionary *adobeOptions = [payload.integrations[@"Adobe Analytics"] mutableCopy];
     if (!adobeOptions) {
         adobeOptions = [NSMutableDictionary new];
     }
     [adobeOptions setObject:self.cachedMarketingCloudId forKey:@"marketingCloudVisitorId"];
-    
+
     if (payload.integrations != nil) {
         NSMutableDictionary *existingIntegrations = [payload.integrations mutableCopy];
         [existingIntegrations removeObjectForKey:@"AdobeAnalytics"];
         [integrations addEntriesFromDictionary:existingIntegrations];
     }
     [integrations setObject:adobeOptions forKey:@"Adobe Analytics"];
-    
+
     return integrations;
 }
 
 
 - (void)context:(SEGContext *_Nonnull)context next:(SEGMiddlewareNext _Nonnull)next {
-    if ([context.payload isKindOfClass:[SEGAliasPayload class]]) {
-        next(context);
-        return;
-    }
-    
+    // If we still don't have a marketing cloud visitor ID we can't inject it
     if (self.cachedMarketingCloudId.length == 0) {
         next(context);
         return;
     }
 
-    SEGIdentifyPayload *identify =(SEGIdentifyPayload *)context.payload;
-    SEGTrackPayload *track =(SEGTrackPayload *)context.payload;
-    SEGScreenPayload *screen =(SEGScreenPayload *)context.payload;
-    SEGGroupPayload *group =(SEGGroupPayload *)context.payload;
-  
+    SEGContext *updatedContext = context;
+
+    if ([context.payload isKindOfClass:[SEGTrackPayload class]]) {
+        SEGTrackPayload *track = (SEGTrackPayload *)context.payload;
+        NSMutableDictionary *integrations = [self buildIntegrationsObject:track];
+
+        SEGContext *newTrackContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
+          ctx.payload = [[SEGTrackPayload alloc] initWithEvent:track.event
+                                                    properties:track.properties
+                                                    context:track.context
+                                                    integrations: integrations];
+                                                  }];
+        updatedContext = newTrackContext;
+    }
+    
     if ([context.payload isKindOfClass:[SEGIdentifyPayload class]]){
+        SEGIdentifyPayload *identify= (SEGIdentifyPayload *)context.payload;
         NSMutableDictionary *integrations = [self buildIntegrationsObject:identify];
         
         SEGContext *newIdentifyContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
@@ -296,45 +312,37 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
                                                         integrations: integrations];
         }];
         
-        next(newIdentifyContext);
+        updatedContext = newIdentifyContext;
     }
 
-    if ([context.payload isKindOfClass:[SEGTrackPayload class]]){
-        NSMutableDictionary *integrations = [self buildIntegrationsObject:track];
-        
-        SEGContext *newTrackContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
-          ctx.payload = [[SEGTrackPayload alloc] initWithEvent:track.event
-                                                    properties:track.properties
-                                                    context:track.context
-                                                    integrations: integrations];
-                                                  }];
-        next(newTrackContext);
-    }
-
-    if ([context.payload isKindOfClass:[SEGScreenPayload class]]){
+    if ([context.payload isKindOfClass:[SEGScreenPayload class]]) {
+        SEGScreenPayload *screen = (SEGScreenPayload *)context.payload;
         NSMutableDictionary *integrations = [self buildIntegrationsObject:screen];
-        
+
         SEGContext *newScreenContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
           ctx.payload = [[SEGScreenPayload alloc] initWithName:screen.name
                                                   properties:screen.properties
                                                   context:screen.context
                                                   integrations: integrations];
                                                 }];
-        next(newScreenContext);
-    }
-
-    if ([context.payload isKindOfClass:[SEGGroupPayload class]]){
-        NSMutableDictionary *integrations = [self buildIntegrationsObject:group];
-                
-        SEGContext *newGroupContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
-          ctx.payload = [[SEGGroupPayload alloc] initWithGroupId:group.groupId
-                                                  traits: group.traits
-                                                  context:group.context
-                                                  integrations: integrations];
-                                                }];
-        next(newGroupContext);
+        updatedContext = newScreenContext;
     }
     
+    if ([context.payload isKindOfClass:[SEGGroupPayload class]]){
+        SEGGroupPayload *group = (SEGGroupPayload *)context.payload;
+        NSMutableDictionary *integrations = [self buildIntegrationsObject:group];
+        
+        SEGContext *newGroupContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
+            ctx.payload = [[SEGGroupPayload alloc] initWithGroupId:group.groupId
+                                                            traits: group.traits
+                                                           context:group.context
+                                                      integrations: integrations];
+        }];
+        
+        updatedContext = newGroupContext;
+    }
+
+    next(updatedContext);
     return;
 }
 

@@ -3,7 +3,8 @@
 
 @interface SEGMCVIDTracker : NSObject <SEGMiddleware>
 
--(id _Nonnull)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region;
+- (instancetype _Nonnull)init NS_UNAVAILABLE;
+- (instancetype _Nonnull)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region NS_DESIGNATED_INITIALIZER;
 
 @property (nonatomic, strong, nonnull) NSString *organizationId;
 @property (nonatomic, strong, nonnull) NSString *region;
@@ -19,7 +20,9 @@ typedef NS_ENUM(NSInteger, MCVIDAdobeErrorCode) {
     // Unable to deserialize JSON from response
     MCVIDAdobeErrorCodeClientSerializationError,
     // An error was provided by the server
-    MCVIDAdobeErrorCodeServerError
+    MCVIDAdobeErrorCodeServerError,
+    // The MCVID is not yet available
+    MCVIDAdobeErrorCodeUnavailable
 };
 
 @interface MCVIDAdobeError : NSObject
