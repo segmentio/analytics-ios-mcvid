@@ -20,7 +20,9 @@ typedef NS_ENUM(NSInteger, MCVIDAdobeErrorCode) {
     // Unable to deserialize JSON from response
     MCVIDAdobeErrorCodeClientSerializationError,
     // An error was provided by the server
-    MCVIDAdobeErrorCodeServerError
+    MCVIDAdobeErrorCodeServerError,
+    // The MCVID is not yet available
+    MCVIDAdobeErrorCodeUnavailable
 };
 
 @interface MCVIDAdobeError : NSObject

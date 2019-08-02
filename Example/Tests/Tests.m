@@ -99,6 +99,18 @@ describe(@"SEGMCVID", ^{
 
         expect(spy.lastEventType).will.equal(SEGEventTypeFlush);
     });
+
+    it(@"Does not attempt to perform an idsync if no mcvid is available yet", ^{
+        SEGMCVIDTracker *mcvid = [[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region];
+
+        __block NSError *mcvidError = nil;
+        [mcvid setValue:nil forKey:@"cachedMarketingCloudId"];
+        [mcvid syncIntegrationCode:@"integration_code" userIdentifier:@"user_id" completion:^(NSError *error) {
+            mcvidError = error;
+        }];
+
+        expect(mcvidError.code).will.equal(MCVIDAdobeErrorCodeUnavailable);
+    });
 });
 
 describe(@"createURL function", ^{

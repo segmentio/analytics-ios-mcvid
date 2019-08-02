@@ -145,10 +145,18 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
 }
 
 - (void)syncIntegrationCode:(NSString * _Nonnull)integrationCode userIdentifier:(NSString * _Nonnull)userIdentifier completion:(void (^)(NSError * _Nullable))completion {
-
     //Response and error handling variables
     NSString *errorResponseKey = @"errors";
     NSString *errorDomain = @"Segment-Adobe";
+
+    // We cannot perform an idsync if we don't have a MCVID.
+    if (self.cachedMarketingCloudId.length == 0) {
+        NSString *message = @"A MCVID is not yet available. Please, retry the operation later.";
+        MCVIDAdobeError *adobeError = [[MCVIDAdobeError alloc] initWithCode:MCVIDAdobeErrorCodeUnavailable message:message error:nil];
+        NSError *compositeError = [NSError errorWithDomain:errorDomain code:adobeError.code userInfo:@{MCVIDAdobeErrorKey:adobeError}];
+        completion(compositeError);
+        return;
+    }
 
     NSArray<NSURLQueryItem *>* syncQueryItems = [self URLQueryItemsForIntegrationCode:integrationCode userIdentifier:userIdentifier];
     NSURL *url = [self createURLWithAdditionalQueryItems:syncQueryItems];
