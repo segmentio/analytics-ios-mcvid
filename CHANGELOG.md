@@ -1,5 +1,9 @@
 Change Log
 ==========
+Version 1.2.1 *(8th January, 2020)*
+-------------------------------------
+* Modified analytics dependency version number such that 3.6 or greater will be used.
+
 Version 1.2.0 *(1st July, 2019)*
 -------------------------------------
 * Ensures middleware doesn't break chain of events by always calling next.
