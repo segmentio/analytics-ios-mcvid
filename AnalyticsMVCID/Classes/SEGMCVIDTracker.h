@@ -5,6 +5,7 @@
 
 - (instancetype _Nonnull)init NS_UNAVAILABLE;
 - (instancetype _Nonnull)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region NS_DESIGNATED_INITIALIZER;
++ (NSString *_Nullable)getCachedMarketingId;
 
 @property (nonatomic, strong, nonnull) NSString *organizationId;
 @property (nonatomic, strong, nonnull) NSString *region;

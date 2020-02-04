@@ -39,9 +39,14 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
 
 @implementation SEGMCVIDTracker
 
++ (NSString *_Nullable)getCachedMarketingId{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    return [defaults stringForKey:cachedMarketingCloudIdKey];
+}
+
 -(id)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region
   {
-    if (self = [super init])
+      if ((self = [super init]))
     {
       self.organizationId = organizationId;
       self.region = region;
