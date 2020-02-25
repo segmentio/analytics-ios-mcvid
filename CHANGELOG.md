@@ -1,5 +1,11 @@
 Change Log
 ==========
+
+Version 1.2.2 *(25th February, 2020)*
+-------------------------------------
+* Added Carthage support.
+* Added ability to get cached marketing id externally.
+
 Version 1.2.1 *(8th January, 2020)*
 -------------------------------------
 * Modified analytics dependency version number such that 3.6 or greater will be used.
