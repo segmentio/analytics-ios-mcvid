@@ -1,6 +1,17 @@
 #import <Foundation/Foundation.h>
 #import <Analytics/SEGMiddleware.h>
 
+// Visitor Authentication States in Audience Manager
+// @see https://docs.adobe.com/content/help/en/id-service/using/reference/authenticated-state.html
+typedef NS_ENUM(NSInteger, MCVIDAuthState) {
+    // Unknown or never authenticated
+    MCVIDAuthStateUnknown,
+    // Authenticated for a particular instance, page, or app
+    MCVIDAuthStateAuthenticated,
+    // Logged out
+    MCVIDAuthStateLoggedOut,
+};
+
 @interface SEGMCVIDTracker : NSObject <SEGMiddleware>
 
 - (instancetype _Nonnull)init NS_UNAVAILABLE;
@@ -11,6 +22,7 @@
 @property (nonatomic, strong, nonnull) NSString *region;
 
 - (void)syncIntegrationCode:(NSString *_Nonnull)integrationCode userIdentifier:(NSString *_Nonnull)userIdentifier completion:(void (^_Nonnull)(NSError *_Nullable))completion;
+- (void)syncIntegrationCode:(NSString *_Nonnull)integrationCode userIdentifier:(NSString *_Nonnull)userIdentifier authentication:(MCVIDAuthState)state completion:(void (^_Nonnull)(NSError *_Nullable))completion;
 
 @end
 

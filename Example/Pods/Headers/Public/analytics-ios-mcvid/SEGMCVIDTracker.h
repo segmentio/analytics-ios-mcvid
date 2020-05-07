@@ -1,1 +1,1 @@
-../../../../../analytics-ios-mcvid/Classes/SEGMCVIDTracker.h
+../../../../../AnalyticsMVCID/Classes/SEGMCVIDTracker.h

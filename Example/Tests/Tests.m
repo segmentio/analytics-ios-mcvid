@@ -19,7 +19,7 @@
 @interface SEGMCVIDTracker (Testing)
 
 - (NSURL * _Nonnull)createURLWithAdditionalQueryItems:(NSArray<NSURLQueryItem *>* _Nullable)extraQueryItems;
-- (NSArray<NSURLQueryItem *>* _Nonnull)URLQueryItemsForIntegrationCode:(NSString * _Nonnull)integrationCode userIdentifier:(NSString* _Nonnull)userIdentifier;
+- (NSArray<NSURLQueryItem *>* _Nonnull)URLQueryItemsForIntegrationCode:(NSString * _Nonnull)integrationCode userIdentifier:(NSString* _Nonnull)userIdentifier authentication:(MCVIDAuthState)state;
 - (NSMutableDictionary * _Nonnull)buildIntegrationsObject:(SEGPayload *_Nonnull)payload;
 
 @property(nonatomic, nonnull) NSString *cachedMarketingCloudId;
@@ -131,12 +131,20 @@ describe(@"createURL function", ^{
     });
 
     it(@"can properly create the synIntegrationCode url", ^{
-        NSArray *queryItems = [instance URLQueryItemsForIntegrationCode:@"integration_code" userIdentifier:@"user_id"];
+        NSArray *queryItems = [instance URLQueryItemsForIntegrationCode:@"integration_code" userIdentifier:@"user_id" authentication:MCVIDAuthStateUnknown];
         NSURL *url = [instance createURLWithAdditionalQueryItems:queryItems];
         NSString *urlString = url.absoluteString;
 
-        expect([urlString rangeOfString:@"d_cid_ic=integration_code%01user_id"].location).toNot.equal(NSNotFound);
+        expect([urlString rangeOfString:@"d_cid_ic=integration_code%01user_id%010"].location).toNot.equal(NSNotFound);
         expect([urlString rangeOfString:@"d_mid"].location).toNot.equal(NSNotFound);
+    });
+
+    it(@"honors AuthState", ^{
+        NSArray *queryItems = [instance URLQueryItemsForIntegrationCode:@"integration_code" userIdentifier:@"user_id" authentication:MCVIDAuthStateAuthenticated];
+        NSURL *url = [instance createURLWithAdditionalQueryItems:queryItems];
+        NSString *urlString = url.absoluteString;
+
+        expect([urlString rangeOfString:@"d_cid_ic=integration_code%01user_id%011"].location).toNot.equal(NSNotFound);
     });
 
     it(@"can properly create the getMarketingCloudId url", ^{

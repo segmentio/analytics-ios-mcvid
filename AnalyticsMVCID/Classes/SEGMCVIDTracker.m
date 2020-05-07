@@ -9,6 +9,20 @@ NSString *const MCVIDAdobeErrorKey = @"MCVIDAdobeErrorKey";
 NSString *const cachedMarketingCloudIdKey = @"com.segment.mcvid.marketingCloudId";
 NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
 
+// Request values taken from https://docs.adobe.com/content/help/en/audience-manager/user-guide/reference/visitor-authentication-states.html
+NSString * MCVIDAuthStateRequestValue(MCVIDAuthState state) {
+    switch (state) {
+        case MCVIDAuthStateUnknown:
+            return @"0";
+            break;
+        case MCVIDAuthStateAuthenticated:
+            return @"1";
+            break;
+        case MCVIDAuthStateLoggedOut:
+            return @"2";
+            break;
+    }
+}
 
 @interface MCVIDAdobeError ()
 
@@ -150,6 +164,11 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
 }
 
 - (void)syncIntegrationCode:(NSString * _Nonnull)integrationCode userIdentifier:(NSString * _Nonnull)userIdentifier completion:(void (^)(NSError * _Nullable))completion {
+    // According to Adobe, Unknown is applied by default when AuthState is not used with a visitor ID or not explicitly set on each page or app context.
+    [self syncIntegrationCode:integrationCode userIdentifier:userIdentifier authentication:MCVIDAuthStateUnknown completion:completion];
+}
+
+- (void)syncIntegrationCode:(NSString *_Nonnull)integrationCode userIdentifier:(NSString *_Nonnull)userIdentifier authentication:(MCVIDAuthState)state completion:(void (^_Nonnull)(NSError *_Nullable))completion {
     //Response and error handling variables
     NSString *errorResponseKey = @"errors";
     NSString *errorDomain = @"Segment-Adobe";
@@ -163,7 +182,7 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
         return;
     }
 
-    NSArray<NSURLQueryItem *>* syncQueryItems = [self URLQueryItemsForIntegrationCode:integrationCode userIdentifier:userIdentifier];
+    NSArray<NSURLQueryItem *>* syncQueryItems = [self URLQueryItemsForIntegrationCode:integrationCode userIdentifier:userIdentifier authentication:state];
     NSURL *url = [self createURLWithAdditionalQueryItems:syncQueryItems];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
@@ -244,7 +263,7 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
     return url;
 }
 
-- (NSArray<NSURLQueryItem *>* _Nonnull)URLQueryItemsForIntegrationCode:(NSString * _Nonnull)integrationCode userIdentifier:(NSString* _Nonnull)userIdentifier {
+- (NSArray<NSURLQueryItem *>* _Nonnull)URLQueryItemsForIntegrationCode:(NSString * _Nonnull)integrationCode userIdentifier:(NSString* _Nonnull)userIdentifier authentication:(MCVIDAuthState)state {
     NSString *marketingCloudIdKey = @"d_mid";
     NSString *advertisingIdKey = @"d_cid_ic";
     NSString *separator = @"%01";
@@ -255,7 +274,7 @@ NSString *const cachedAdvertisingIdKey = @"com.segment.mcvid.advertisingId";
     [queryItems addObject:[NSURLQueryItem queryItemWithName:marketingCloudIdKey value:self.cachedMarketingCloudId]];
 
     // d_cid_ic=<integration_code>%01<user_identifier>
-    NSString *encodedAdvertisingValue = [NSString stringWithFormat:@"%@%@%@", integrationCode, separator, userIdentifier];
+    NSString *encodedAdvertisingValue = [NSString stringWithFormat:@"%@%@%@%@%@", integrationCode, separator, userIdentifier, separator, MCVIDAuthStateRequestValue(state)];
     //removes %25 html encoding of '%'
     NSString *normalAdvertisingValue = [encodedAdvertisingValue stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     [queryItems addObject:[NSURLQueryItem queryItemWithName:advertisingIdKey value:normalAdvertisingValue]];
