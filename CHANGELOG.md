@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+Version 1.2.3 *(7th May, 2020)*
+-------------------------------
+* Added support for Auth State.
+
 Version 1.2.2 *(25th February, 2020)*
 -------------------------------------
 * Added Carthage support.
