@@ -1,5 +1,7 @@
 #import "SEGMCVIDTracker.h"
 #import <Analytics/SEGAnalyticsUtils.h>
+#import <Analytics/SEGState.h>
+#import <Analytics/SEGAnalyticsConfiguration.h>
 #import <AdSupport/ASIdentifierManager.h>
 #include <time.h>
 #include <stdlib.h>
@@ -48,7 +50,6 @@ NSString * MCVIDAuthStateRequestValue(MCVIDAuthState state) {
     @property(nonatomic, nonnull) NSString *cachedMarketingCloudId;
     @property(nonatomic, nonnull) NSString *cachedAdvertisingId;
     @property dispatch_queue_t _Nonnull backgroundQueue;
-
 @end
 
 @implementation SEGMCVIDTracker
@@ -58,9 +59,12 @@ NSString * MCVIDAuthStateRequestValue(MCVIDAuthState state) {
     return [defaults stringForKey:cachedMarketingCloudIdKey];
 }
 
--(id)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region
-  {
-      if ((self = [super init]))
+- (id)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region {
+    return [self initWithOrganizationId:organizationId region:region mcvidGenerationMode: MCVIDGenerationModeRemote];
+}
+
+- (instancetype _Nonnull)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region mcvidGenerationMode:(MCVIDGenerationMode)mcvidGenerationMode {
+    if ((self = [super init]))
     {
       self.organizationId = organizationId;
       self.region = region;
@@ -71,40 +75,56 @@ NSString * MCVIDAuthStateRequestValue(MCVIDAuthState state) {
     _currentRetryCount = 1;
     self.backgroundQueue = dispatch_queue_create("com.segment.mcvid", NULL);
 
-
     //Store advertisingId and marketingCloudId on local storage
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSString *segIdfa = SEGIDFA();
-    _cachedMarketingCloudId = [defaults stringForKey:cachedMarketingCloudIdKey];
-    _cachedAdvertisingId = [defaults stringForKey:cachedAdvertisingIdKey];
-    if (_cachedAdvertisingId == NULL) {
-        [defaults setObject:segIdfa forKey:cachedAdvertisingIdKey];
-        _cachedAdvertisingId = segIdfa;
+    SEGAdSupportBlock adSupportBlock = [[SEGState sharedInstance] configuration].adSupportBlock;
+
+    NSString *advertisingId = nil;
+    if (adSupportBlock != NULL) {
+        advertisingId = adSupportBlock();
+        _cachedAdvertisingId = [defaults stringForKey:cachedAdvertisingIdKey];
+        if (_cachedAdvertisingId == NULL) {
+            [defaults setObject:advertisingId forKey:cachedAdvertisingIdKey];
+            _cachedAdvertisingId = advertisingId;
+        }
     }
-    //Defaut value for integration code which indicate ios
-    NSString *integrationCode = @"DSID_20915";
+
+    _cachedMarketingCloudId = [defaults stringForKey:cachedMarketingCloudIdKey];
 
     if (self.cachedMarketingCloudId.length == 0) {
-        [self getMarketingCloudId:organizationId completion:^(NSString  * _Nullable marketingCloudId, NSError * _Nullable error) {
-          [defaults setObject:marketingCloudId forKey:cachedMarketingCloudIdKey];
-            self.cachedMarketingCloudId = [defaults stringForKey:cachedMarketingCloudIdKey];
-            [self syncIntegrationCode:integrationCode userIdentifier:self.cachedAdvertisingId completion:^(NSError *error) {
-              if (error) {
-                  return;
-              }
-          }];
-        }];
-    } else if (![_cachedAdvertisingId isEqualToString:segIdfa]) {
-      [self syncIntegrationCode:integrationCode userIdentifier:self.cachedAdvertisingId completion:^(NSError * _Nullable error) {
-          if (error) {
-              return;
-          }
-      }];
+        if (mcvidGenerationMode == MCVIDGenerationModeLocal) {
+            NSString *mcvid = [self generateMCVID];
+            [defaults setObject:mcvid forKey:cachedMarketingCloudIdKey];
+            self.cachedMarketingCloudId = mcvid;
+            [self syncAdvertisingIdentifier];
+        } else {
+            [self getMarketingCloudId:organizationId completion:^(NSString * _Nullable marketingCloudId, NSError * _Nullable error) {
+                [defaults setObject:marketingCloudId forKey:cachedMarketingCloudIdKey];
+                self.cachedMarketingCloudId = marketingCloudId;
+                [self syncAdvertisingIdentifier];
+            }];
+        }
+    } else if (![_cachedAdvertisingId isEqualToString:advertisingId]) {
+        [self syncAdvertisingIdentifier];
     }
 
     [defaults synchronize];
     return self;
-  }
+}
+
+- (void)syncAdvertisingIdentifier {
+    //Default value for integration code which indicate ios
+    NSString *integrationCode = @"DSID_20915";
+
+    if (self.cachedAdvertisingId.length == 0) {
+        return;
+    }
+    [self syncIntegrationCode:integrationCode userIdentifier:self.cachedAdvertisingId completion:^(NSError *error) {
+        if (error) {
+            return;
+        }
+    }];
+}
 
 - (void)getMarketingCloudId:(NSString *_Nonnull)organizationId completion:(void (^)(NSString * _Nullable marketingCloudId, NSError *_Nullable))completion {
 
@@ -368,6 +388,14 @@ NSString * MCVIDAuthStateRequestValue(MCVIDAuthState state) {
 
     next(updatedContext);
     return;
+}
+
+- (NSString *)generateMCVID {
+    NSMutableString *mcvid = [[NSMutableString alloc] init];
+    for (int i = 0; i < 38; i++) {
+        [mcvid appendFormat:@"%d", arc4random_uniform(10)];
+    }
+    return mcvid;
 }
 
 @end

@@ -12,10 +12,18 @@ typedef NS_ENUM(NSInteger, MCVIDAuthState) {
     MCVIDAuthStateLoggedOut,
 };
 
+typedef NS_ENUM(NSInteger, MCVIDGenerationMode) {
+    // Locally generates a UUID
+    MCVIDGenerationModeLocal,
+    // Delegate its generation to the server side
+    MCVIDGenerationModeRemote,
+};
+
 @interface SEGMCVIDTracker : NSObject <SEGMiddleware>
 
 - (instancetype _Nonnull)init NS_UNAVAILABLE;
-- (instancetype _Nonnull)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region NS_DESIGNATED_INITIALIZER;
+- (instancetype _Nonnull)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region;
+- (instancetype _Nonnull)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region mcvidGenerationMode:(MCVIDGenerationMode)mcvidGenerationMode NS_DESIGNATED_INITIALIZER;
 + (NSString *_Nullable)getCachedMarketingId;
 
 @property (nonatomic, strong, nonnull) NSString *organizationId;
