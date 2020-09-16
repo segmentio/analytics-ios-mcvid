@@ -14,6 +14,7 @@
 #import "SEGAppDelegate.h"
 #import "SEGPayload.h"
 #import "SEGMiddlewareSpy.h"
+#import <Analytics/SEGState.h>
 
 // https://github.com/Specta/Specta
 @interface SEGMCVIDTracker (Testing)
@@ -45,22 +46,44 @@ describe(@"SEGMCVID", ^{
         configuration =  [SEGAnalyticsConfiguration configurationWithWriteKey:@"some_write_key"];
         organizationId = @"B3CB46FC57C6C8F77F000101@AdobeOrg";
         region = @"6";
-        configuration.middlewares = @[[[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region]];
+        configuration.sourceMiddleware = @[[[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region]];
         configuration.trackApplicationLifecycleEvents = YES;
         [SEGAnalytics setupWithConfiguration:configuration];
-        instance = [[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region];
+        [SEGState sharedInstance].configuration = configuration;
+        instance = [[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region mcvidGenerationMode:MCVIDGenerationModeLocal];
         
     });
-    
-    it(@"should properly update the cachedAdvertisingId", ^{
-        NSString *cachedAdvertisingId = instance.cachedAdvertisingId;
-        expect(cachedAdvertisingId).willNot.beNil();
+
+    describe(@"Not inizializing adSupportBlock", ^{
+        it(@"should not update the cachedAdvertisingId", ^{
+            NSString *cachedAdvertisingId = instance.cachedAdvertisingId;
+            expect(cachedAdvertisingId).will.beNil();
+        });
+
+        it(@"should not store the cachedAdvertisingId in NSUserDefaults", ^{
+            NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+            NSString *storedAdvertisingId = [defaults stringForKey:@"com.segment.mcvid.advertisingId"];
+            expect(storedAdvertisingId).will.beNil();
+        });
     });
     
-    it(@"should properly store the cachedAdvertisingId in NSUserDefaults", ^{
-        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-        NSString *storedAdvertisingId = [defaults stringForKey:@"com.segment.mcvid.advertisingId"];
-        expect(storedAdvertisingId).willNot.beNil();
+    describe(@"Inizializing adSupportBlock", ^{
+        beforeEach(^{
+            configuration.adSupportBlock = ^NSString * _Nonnull{
+                return @"035911EA467D4056903B65CF44F633B";
+            };
+
+            it(@"should update the cachedAdvertisingId", ^{
+                NSString *cachedAdvertisingId = instance.cachedAdvertisingId;
+                expect(cachedAdvertisingId).willNot.beNil();
+            });
+
+            it(@"should properly store the cachedAdvertisingId in NSUserDefaults", ^{
+                NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+                NSString *storedAdvertisingId = [defaults stringForKey:@"com.segment.mcvid.advertisingId"];
+                expect(storedAdvertisingId).willNot.beNil();
+            });
+        });
     });
     
     it(@"can make basic identify calls", ^{
@@ -127,7 +150,6 @@ describe(@"createURL function", ^{
         configuration.trackApplicationLifecycleEvents = YES;
         [SEGAnalytics setupWithConfiguration:configuration];
         instance = [[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region];
-        
     });
 
     it(@"can properly create the synIntegrationCode url", ^{
