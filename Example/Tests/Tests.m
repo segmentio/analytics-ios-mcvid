@@ -69,20 +69,20 @@ describe(@"SEGMCVID", ^{
     
     describe(@"Inizializing adSupportBlock", ^{
         beforeEach(^{
-            configuration.adSupportBlock = ^NSString * _Nonnull{
-                return @"035911EA467D4056903B65CF44F633B";
-            };
+            instance = [[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region advertisingIdProvider:^NSString * _Nonnull{
+                return @"12345678901234567890123456789012345678";
+            } mcvidGenerationMode:MCVIDGenerationModeLocal];
+        });
 
-            it(@"should update the cachedAdvertisingId", ^{
-                NSString *cachedAdvertisingId = instance.cachedAdvertisingId;
-                expect(cachedAdvertisingId).willNot.beNil();
-            });
+        it(@"should update the cachedAdvertisingId", ^{
+            NSString *cachedAdvertisingId = instance.cachedAdvertisingId;
+            expect(cachedAdvertisingId).willNot.beNil();
+        });
 
-            it(@"should properly store the cachedAdvertisingId in NSUserDefaults", ^{
-                NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-                NSString *storedAdvertisingId = [defaults stringForKey:@"com.segment.mcvid.advertisingId"];
-                expect(storedAdvertisingId).willNot.beNil();
-            });
+        it(@"should properly store the cachedAdvertisingId in NSUserDefaults", ^{
+            NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+            NSString *storedAdvertisingId = [defaults stringForKey:@"com.segment.mcvid.advertisingId"];
+            expect(storedAdvertisingId).willNot.beNil();
         });
     });
     
@@ -113,7 +113,7 @@ describe(@"SEGMCVID", ^{
         SEGMiddlewareSpy *spy = [[SEGMiddlewareSpy alloc] init];
 
         SEGAnalyticsConfiguration *configuration =  [SEGAnalyticsConfiguration configurationWithWriteKey:@"some_write_key"];
-        configuration.middlewares = @[mcvid, spy];
+        configuration.sourceMiddleware = @[mcvid, spy];
 
         SEGAnalytics *analytics = [[SEGAnalytics alloc] initWithConfiguration:configuration];
 
@@ -146,7 +146,7 @@ describe(@"createURL function", ^{
         configuration =  [SEGAnalyticsConfiguration configurationWithWriteKey:@"some_write_key"];
         organizationId = @"B3CB46FC57C6C8F77F000101@AdobeOrg";
         region = @"6";
-        configuration.middlewares = @[[[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region]];
+        configuration.sourceMiddleware = @[[[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region]];
         configuration.trackApplicationLifecycleEvents = YES;
         [SEGAnalytics setupWithConfiguration:configuration];
         instance = [[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region];
@@ -189,7 +189,7 @@ describe(@"buildIntegrationObject Function", ^{
         configuration =  [SEGAnalyticsConfiguration configurationWithWriteKey:@"some_write_key"];
         organizationId = @"B3CB46FC57C6C8F77F000101@AdobeOrg";
         region = @"6";
-        configuration.middlewares = @[[[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region]];
+        configuration.sourceMiddleware = @[[[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region]];
         configuration.trackApplicationLifecycleEvents = YES;
         [SEGAnalytics setupWithConfiguration:configuration];
         instance = [[SEGMCVIDTracker alloc] initWithOrganizationId:organizationId region:region];

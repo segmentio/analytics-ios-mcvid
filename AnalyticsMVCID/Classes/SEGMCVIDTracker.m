@@ -60,10 +60,17 @@ NSString * MCVIDAuthStateRequestValue(MCVIDAuthState state) {
 }
 
 - (id)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region {
-    return [self initWithOrganizationId:organizationId region:region mcvidGenerationMode: MCVIDGenerationModeRemote];
+    return [self initWithOrganizationId:organizationId region:region advertisingIdProvider:nil mcvidGenerationMode: MCVIDGenerationModeRemote];
 }
 
+- (instancetype _Nonnull)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region advertisingIdProvider:(SEGAdSupportBlock _Nullable)advertisingIdProvider {
+    return [self initWithOrganizationId:organizationId region:region advertisingIdProvider:advertisingIdProvider mcvidGenerationMode: MCVIDGenerationModeRemote];
+}
 - (instancetype _Nonnull)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region mcvidGenerationMode:(MCVIDGenerationMode)mcvidGenerationMode {
+    return [self initWithOrganizationId:organizationId region:region advertisingIdProvider:nil mcvidGenerationMode:mcvidGenerationMode];
+}
+
+- (instancetype _Nonnull)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region advertisingIdProvider:(SEGAdSupportBlock _Nullable)advertisingIdProvider mcvidGenerationMode:(MCVIDGenerationMode)mcvidGenerationMode {
     if ((self = [super init]))
     {
       self.organizationId = organizationId;
@@ -77,11 +84,10 @@ NSString * MCVIDAuthStateRequestValue(MCVIDAuthState state) {
 
     //Store advertisingId and marketingCloudId on local storage
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    SEGAdSupportBlock adSupportBlock = [[SEGState sharedInstance] configuration].adSupportBlock;
 
     NSString *advertisingId = nil;
-    if (adSupportBlock != NULL) {
-        advertisingId = adSupportBlock();
+    if (advertisingIdProvider != nil) {
+        advertisingId = advertisingIdProvider();
         _cachedAdvertisingId = [defaults stringForKey:cachedAdvertisingIdKey];
         if (_cachedAdvertisingId == NULL) {
             [defaults setObject:advertisingId forKey:cachedAdvertisingIdKey];

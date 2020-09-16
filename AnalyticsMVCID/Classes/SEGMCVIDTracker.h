@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <Analytics/SEGMiddleware.h>
+#import <Analytics/SEGAnalyticsConfiguration.h>
 
 // Visitor Authentication States in Audience Manager
 // @see https://docs.adobe.com/content/help/en/id-service/using/reference/authenticated-state.html
@@ -23,7 +24,9 @@ typedef NS_ENUM(NSInteger, MCVIDGenerationMode) {
 
 - (instancetype _Nonnull)init NS_UNAVAILABLE;
 - (instancetype _Nonnull)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region;
-- (instancetype _Nonnull)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region mcvidGenerationMode:(MCVIDGenerationMode)mcvidGenerationMode NS_DESIGNATED_INITIALIZER;
+- (instancetype _Nonnull)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region advertisingIdProvider:(SEGAdSupportBlock _Nullable)advertisingIdProvider;
+- (instancetype _Nonnull)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region mcvidGenerationMode:(MCVIDGenerationMode)mcvidGenerationMode;
+- (instancetype _Nonnull)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region advertisingIdProvider:(SEGAdSupportBlock _Nullable)advertisingIdProvider mcvidGenerationMode:(MCVIDGenerationMode)mcvidGenerationMode NS_DESIGNATED_INITIALIZER;
 + (NSString *_Nullable)getCachedMarketingId;
 
 @property (nonatomic, strong, nonnull) NSString *organizationId;
