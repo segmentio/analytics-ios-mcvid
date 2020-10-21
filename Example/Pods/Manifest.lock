@@ -1,6 +1,6 @@
 PODS:
   - Analytics (4.1.0)
-  - analytics-ios-mcvid (1.2.3):
+  - analytics-ios-mcvid (1.2.4):
     - Analytics
   - Expecta (1.0.6)
   - Specta (1.0.7)
@@ -23,7 +23,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Analytics: 21202e6dee8b74c73944084d2f876ce5cfd65e07
-  analytics-ios-mcvid: 11bdb49747e2ea96276ef9360c27b649db4593f6
+  analytics-ios-mcvid: bb605def3146f7c29acf2249b3394ffeec6445f0
   Expecta: 3b6bd90a64b9a1dcb0b70aa0e10a7f8f631667d5
   Specta: 3e1bd89c3517421982dc4d1c992503e48bd5fe66
 
