@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 1.2.4 *(21st October, 2020)*
+------------------------------------
+* Added support for Analytics 4.1.0
+* Fill advertisement identifier
+
 Version 1.2.3 *(7th May, 2020)*
 -------------------------------
 * Added support for Auth State.

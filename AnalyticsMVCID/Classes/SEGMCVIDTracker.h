@@ -1,6 +1,12 @@
 #import <Foundation/Foundation.h>
+
+#if defined(__has_include) && __has_include(<Analytics/SEGAnalytics.h>)
 #import <Analytics/SEGMiddleware.h>
 #import <Analytics/SEGAnalyticsConfiguration.h>
+#else
+#import <Segment/SEGMiddleware.h>
+#import <Segment/SEGAnalyticsConfiguration.h>
+#endif
 
 // Visitor Authentication States in Audience Manager
 // @see https://docs.adobe.com/content/help/en/id-service/using/reference/authenticated-state.html

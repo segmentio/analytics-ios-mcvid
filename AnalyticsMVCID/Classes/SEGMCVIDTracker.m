@@ -1,8 +1,17 @@
 #import "SEGMCVIDTracker.h"
+
+#if defined(__has_include) && __has_include(<Analytics/SEGAnalytics.h>)
 #import <Analytics/SEGAnalyticsUtils.h>
 #import <Analytics/SEGState.h>
 #import <Analytics/SEGAnalyticsConfiguration.h>
+#else
+#import <Segment/SEGAnalyticsUtils.h>
+#import <Segment/SEGState.h>
+#import <Segment/SEGAnalyticsConfiguration.h>
+#endif
+
 #import <AdSupport/ASIdentifierManager.h>
+
 #include <time.h>
 #include <stdlib.h>
 #include <math.h>

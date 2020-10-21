@@ -1,6 +1,0 @@
-framework module analytics_ios_mcvid {
-  umbrella header "analytics-ios-mcvid-umbrella.h"
-
-  export *
-  module * { export * }
-}

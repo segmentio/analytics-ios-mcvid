@@ -3,7 +3,7 @@
  */
 #import <Foundation/Foundation.h>
 
-// This protocol is used for allowing classes for global beforeEach and afterEach blocks.
+// This protocol is used for whitelisting classes for global beforeEach and afterEach blocks.
 // If you want a class to participate in those just add this protocol to a category and it will be
 // included.
 @protocol SPTGlobalBeforeAfterEach <NSObject>

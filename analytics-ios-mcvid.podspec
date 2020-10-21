@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'analytics-ios-mcvid'
-  s.version          = '1.2.3'
+  s.version          = '1.2.4'
   s.summary          = 'Append marketingCloudId to identify calls with analytics-ios-mcvid.'
 
 # This description is used to generate tags and improve search results.
@@ -31,5 +31,5 @@ Analytics-ios-mcvid requests the marketingCloudId from Adobe and appends it to i
 
   s.source_files = 'AnalyticsMVCID/Classes/**/*'
 
-  s.dependency 'Analytics', '~> 4.0'
+  s.dependency 'Analytics'
 end

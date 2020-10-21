@@ -1,6 +1,0 @@
-framework module Pods_analytics_ios_mcvid_Example {
-  umbrella header "Pods-analytics-ios-mcvid_Example-umbrella.h"
-
-  export *
-  module * { export * }
-}
