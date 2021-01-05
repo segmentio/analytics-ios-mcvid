@@ -380,6 +380,7 @@ NSString * MCVIDAuthStateRequestValue(MCVIDAuthState state) {
 
         SEGContext *newScreenContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
           ctx.payload = [[SEGScreenPayload alloc] initWithName:screen.name
+                                                  category: screen.category
                                                   properties:screen.properties
                                                   context:screen.context
                                                   integrations: integrations];

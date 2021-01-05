@@ -1313,6 +1313,31 @@
 			};
 			name = Debug;
 		};
+		3DFC81ED4455A7EE0778D8F117F0C9BA /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 226B2FD514FB71DDFA793F98FDB105F8 /* Analytics.release.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				GCC_PREFIX_HEADER = "Target Support Files/Analytics/Analytics-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_MODULE_NAME = Segment;
+				PRODUCT_NAME = Analytics;
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		6CA999B58AE1F8E689A13A39A16FECA3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 55EB68E11A7E1C68843D3F1C9B4B5BA3 /* Pods-analytics-ios-mcvid_Tests.debug.xcconfig */;
@@ -1580,9 +1605,9 @@
 			};
 			name = Release;
 		};
-		D3159B823F07906F6F072D8D5B480119 /* Release */ = {
+		E079DDCD0152CC39640508DFE83C39DE /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 226B2FD514FB71DDFA793F98FDB105F8 /* Analytics.release.xcconfig */;
+			baseConfigurationReference = 3B851F04FFC6938EE24EACC3A649C532 /* Analytics.debug.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -1590,7 +1615,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
 				GCC_PREFIX_HEADER = "Target Support Files/Analytics/Analytics-prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
 				PRIVATE_HEADERS_FOLDER_PATH = "";
@@ -1601,9 +1626,8 @@
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 			};
-			name = Release;
+			name = Debug;
 		};
 		F4440A04FA711112BFE4E875457DF3BA /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1620,30 +1644,6 @@
 				PRIVATE_HEADERS_FOLDER_PATH = "";
 				PRODUCT_MODULE_NAME = Expecta;
 				PRODUCT_NAME = Expecta;
-				PUBLIC_HEADERS_FOLDER_PATH = "";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		FF0C4A3071B008545D4EFA3E082C2A8C /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B851F04FFC6938EE24EACC3A649C532 /* Analytics.debug.xcconfig */;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				GCC_PREFIX_HEADER = "Target Support Files/Analytics/Analytics-prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PRIVATE_HEADERS_FOLDER_PATH = "";
-				PRODUCT_MODULE_NAME = Segment;
-				PRODUCT_NAME = Analytics;
 				PUBLIC_HEADERS_FOLDER_PATH = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -1703,8 +1703,8 @@
 		9B3EB0D5FAF7D032C9F5E23651C07323 /* Build configuration list for PBXNativeTarget "Analytics" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				FF0C4A3071B008545D4EFA3E082C2A8C /* Debug */,
-				D3159B823F07906F6F072D8D5B480119 /* Release */,
+				E079DDCD0152CC39640508DFE83C39DE /* Debug */,
+				3DFC81ED4455A7EE0778D8F117F0C9BA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
