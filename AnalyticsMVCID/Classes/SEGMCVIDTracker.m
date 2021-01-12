@@ -311,7 +311,7 @@ NSString * MCVIDAuthStateRequestValue(MCVIDAuthState state) {
     // d_cid_ic=<integration_code>%01<user_identifier>
     NSString *encodedAdvertisingValue = [NSString stringWithFormat:@"%@%@%@%@%@", integrationCode, separator, userIdentifier, separator, MCVIDAuthStateRequestValue(state)];
     //removes %25 html encoding of '%'
-    NSString *normalAdvertisingValue = [encodedAdvertisingValue stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString *normalAdvertisingValue = [encodedAdvertisingValue stringByRemovingPercentEncoding];
     [queryItems addObject:[NSURLQueryItem queryItemWithName:advertisingIdKey value:normalAdvertisingValue]];
 
     return queryItems;
@@ -380,6 +380,7 @@ NSString * MCVIDAuthStateRequestValue(MCVIDAuthState state) {
 
         SEGContext *newScreenContext = [context modify:^(id<SEGMutableContext> _Nonnull ctx) {
           ctx.payload = [[SEGScreenPayload alloc] initWithName:screen.name
+                                                  category: screen.category
                                                   properties:screen.properties
                                                   context:screen.context
                                                   integrations: integrations];

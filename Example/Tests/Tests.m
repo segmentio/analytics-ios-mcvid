@@ -11,7 +11,6 @@
 #import "Expecta.h"
 #import "SEGMCVIDTracker.h"
 #import <Analytics/SEGAnalytics.h>
-#import "SEGAppDelegate.h"
 #import "SEGPayload.h"
 #import "SEGMiddlewareSpy.h"
 #import <Analytics/SEGState.h>

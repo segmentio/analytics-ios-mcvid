@@ -27,9 +27,9 @@ Analytics-ios-mcvid requests the marketingCloudId from Adobe and appends it to i
   s.source           = { :git => 'https://github.com/segmentio/analytics-ios-mcvid.git', :tag => s.version.to_s }
   s.social_media_url = 'https://twitter.com/SegmentEng'
 
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '9.0'
 
   s.source_files = 'AnalyticsMVCID/Classes/**/*'
 
-  s.dependency 'Analytics'
+  s.dependency 'Analytics', '~> 4.1.0'
 end
