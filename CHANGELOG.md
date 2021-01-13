@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 1.2.5 *(12th January, 2021)*
+------------------------------------
+* Fixed issues with Analytics 4.1 support.
+* Removed pods for example project from repo.
+
 Version 1.2.4 *(21st October, 2020)*
 ------------------------------------
 * Added support for Analytics 4.1.0
