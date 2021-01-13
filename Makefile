@@ -3,7 +3,7 @@ XCPRETTY := xcpretty -c && exit ${PIPESTATUS[0]}
 SDK ?= "iphonesimulator"
 DESTINATION ?= "platform=iOS Simulator,name=iPhone 11"
 PROJECT := analytics-ios-mcvid
-XC_ARGS := -scheme $(PROJECT)-Example -workspace Example/$(PROJECT).xcworkspace -sdk $(SDK) -destination $(DESTINATION) ONLY_ACTIVE_ARCH=NO
+XC_ARGS := -scheme $(PROJECT)-Example -workspace Example/$(PROJECT).xcworkspace -sdk $(SDK) -destination $(DESTINATION) ONLY_ACTIVE_ARCH=YES
 
 install: Example/Podfile analytics-ios-mcvid.podspec
 	pod repo update
