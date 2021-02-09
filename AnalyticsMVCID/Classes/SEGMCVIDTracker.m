@@ -59,6 +59,7 @@ NSString * MCVIDAuthStateRequestValue(MCVIDAuthState state) {
     @property(nonatomic, nonnull) NSString *cachedMarketingCloudId;
     @property(nonatomic, nonnull) NSString *cachedAdvertisingId;
     @property dispatch_queue_t _Nonnull backgroundQueue;
+    @property(nonatomic, assign) MCVIDGenerationMode mcvidGenerationMode;
 @end
 
 @implementation SEGMCVIDTracker
@@ -82,8 +83,9 @@ NSString * MCVIDAuthStateRequestValue(MCVIDAuthState state) {
 - (instancetype _Nonnull)initWithOrganizationId:(NSString *_Nonnull)organizationId region:(NSString *_Nonnull)region advertisingIdProvider:(SEGAdSupportBlock _Nullable)advertisingIdProvider mcvidGenerationMode:(MCVIDGenerationMode)mcvidGenerationMode {
     if ((self = [super init]))
     {
-      self.organizationId = organizationId;
-      self.region = region;
+        self.organizationId = organizationId;
+        self.region = region;
+        self.mcvidGenerationMode = mcvidGenerationMode;
     }
 
     //Values for exponential backoff retry logic for API calls
@@ -97,34 +99,42 @@ NSString * MCVIDAuthStateRequestValue(MCVIDAuthState state) {
     NSString *advertisingId = nil;
     if (advertisingIdProvider != nil) {
         advertisingId = advertisingIdProvider();
-        _cachedAdvertisingId = [defaults stringForKey:cachedAdvertisingIdKey];
-        if (_cachedAdvertisingId == NULL) {
-            [defaults setObject:advertisingId forKey:cachedAdvertisingIdKey];
-            _cachedAdvertisingId = advertisingId;
-        }
+    }
+    _cachedAdvertisingId = [defaults stringForKey:cachedAdvertisingIdKey];
+    if (_cachedAdvertisingId == NULL && advertisingId != nil) {
+        [defaults setObject:advertisingId forKey:cachedAdvertisingIdKey];
+        _cachedAdvertisingId = advertisingId;
     }
 
     _cachedMarketingCloudId = [defaults stringForKey:cachedMarketingCloudIdKey];
+    [self generateMCVIDAndSync:advertisingId];
+    return self;
+}
 
+- (void)generateMCVIDAndSync:(NSString *)advertisingId {
     if (self.cachedMarketingCloudId.length == 0) {
-        if (mcvidGenerationMode == MCVIDGenerationModeLocal) {
+        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        if (self.mcvidGenerationMode == MCVIDGenerationModeLocal) {
             NSString *mcvid = [self generateMCVID];
             [defaults setObject:mcvid forKey:cachedMarketingCloudIdKey];
             self.cachedMarketingCloudId = mcvid;
-            [self syncAdvertisingIdentifier];
+            if (advertisingId != nil) {
+                [self syncAdvertisingIdentifier];
+            }
         } else {
-            [self getMarketingCloudId:organizationId completion:^(NSString * _Nullable marketingCloudId, NSError * _Nullable error) {
+            [self getMarketingCloudId:self.organizationId completion:^(NSString * _Nullable marketingCloudId, NSError * _Nullable error) {
                 [defaults setObject:marketingCloudId forKey:cachedMarketingCloudIdKey];
                 self.cachedMarketingCloudId = marketingCloudId;
-                [self syncAdvertisingIdentifier];
+                if (advertisingId != nil) {
+                    [self syncAdvertisingIdentifier];
+                }
             }];
         }
-    } else if (![_cachedAdvertisingId isEqualToString:advertisingId]) {
+    } else if (_cachedAdvertisingId != NULL &&
+               advertisingId != nil &&
+               ![_cachedAdvertisingId isEqualToString:advertisingId]) {
         [self syncAdvertisingIdentifier];
     }
-
-    [defaults synchronize];
-    return self;
 }
 
 - (void)syncAdvertisingIdentifier {
@@ -196,6 +206,16 @@ NSString * MCVIDAuthStateRequestValue(MCVIDAuthState state) {
             });
         }
     }] resume];
+}
+
+- (void)setAdvertisingIdProvider:(SEGAdSupportBlock _Nullable)advertisingIdProvider {
+    NSString *advertisingId = advertisingIdProvider();
+    if (_cachedAdvertisingId == NULL) {
+        _cachedAdvertisingId = advertisingId;
+        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        [defaults setObject:advertisingId forKey:cachedAdvertisingIdKey];
+        [self syncAdvertisingIdentifier];
+    }
 }
 
 - (void)syncIntegrationCode:(NSString * _Nonnull)integrationCode userIdentifier:(NSString * _Nonnull)userIdentifier completion:(void (^)(NSError * _Nullable))completion {

@@ -38,6 +38,7 @@ typedef NS_ENUM(NSInteger, MCVIDGenerationMode) {
 @property (nonatomic, strong, nonnull) NSString *organizationId;
 @property (nonatomic, strong, nonnull) NSString *region;
 
+- (void)setAdvertisingIdProvider:(SEGAdSupportBlock _Nullable)advertisingIdProvider;
 - (void)syncIntegrationCode:(NSString *_Nonnull)integrationCode userIdentifier:(NSString *_Nonnull)userIdentifier completion:(void (^_Nonnull)(NSError *_Nullable))completion;
 - (void)syncIntegrationCode:(NSString *_Nonnull)integrationCode userIdentifier:(NSString *_Nonnull)userIdentifier authentication:(MCVIDAuthState)state completion:(void (^_Nonnull)(NSError *_Nullable))completion;
 
