@@ -19,12 +19,14 @@
     SEGAnalyticsConfiguration *configuration = [SEGAnalyticsConfiguration configurationWithWriteKey:@"YOUR_WRITE_KEY"];
 
     // Configure the client with the MCVID middleware. Intiliaze with your Adobe OrgId and Adobe Region (ie. dcs_region key)
-    configuration.sourceMiddleware = @[ [[SEGMCVIDTracker alloc]  initWithOrganizationId:@"YOUR_ORD_ID@AdobeOrg" region:@"YOUR_REGION_KEY" advertisingIdProvider:^NSString * _Nonnull {
-        return @"12345678901234567890123456789012345678";
-    }] ];
+    SEGMCVIDTracker *tracker = [[SEGMCVIDTracker alloc]  initWithOrganizationId:@"YOUR_ORD_ID@AdobeOrg" region:@"YOUR_REGION_KEY" advertisingIdProvider:nil mcvidGenerationMode:MCVIDGenerationModeLocal];
+    configuration.sourceMiddleware = @[tracker];
     configuration.trackApplicationLifecycleEvents = YES; // Enable this to record certain application events automatically!
     configuration.recordScreenViews = YES; // Enable this to record screen views automatically!
     configuration.flushAt = 1; // Flush events to Segment every 1 event
+    [tracker setAdvertisingIdProvider:^NSString * _Nonnull{
+        return @"12345678901234567890123456789012345678";
+    }];
     [SEGAnalytics setupWithConfiguration:configuration];
     [SEGAnalytics debug:YES];
     // Override point for customization after application launch.
