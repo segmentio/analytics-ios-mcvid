@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+Version 1.2.6 *(9th February, 2021)*
+------------------------------------
+* Provide the library with the possibility to set identifier for advertising or alternative after initialization
+
 Version 1.2.5 *(12th January, 2021)*
 ------------------------------------
 * Fixed issues with Analytics 4.1 support.
