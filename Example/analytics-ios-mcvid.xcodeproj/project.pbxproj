@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		45FE69EECD7939888D05F5AF /* libPods-analytics-ios-mcvid_Tests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A84CA801D283DB23A76F6CC3 /* libPods-analytics-ios-mcvid_Tests.a */; };
+		150E034F5D234C5AE4BD74F3 /* libPods-analytics-ios-mcvid_Tests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 78846B36CDBD9CC4742AF21D /* libPods-analytics-ios-mcvid_Tests.a */; };
 		47FCDA3522F355AB0039DDD9 /* SEGMiddlewareSpy.m in Sources */ = {isa = PBXBuildFile; fileRef = 47FCDA3422F355AB0039DDD9 /* SEGMiddlewareSpy.m */; };
 		6003F58E195388D20070C39A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58D195388D20070C39A /* Foundation.framework */; };
 		6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58F195388D20070C39A /* CoreGraphics.framework */; };
@@ -23,8 +23,8 @@
 		6003F5BA195388D20070C39A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6003F5B8195388D20070C39A /* InfoPlist.strings */; };
 		6003F5BC195388D20070C39A /* Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6003F5BB195388D20070C39A /* Tests.m */; };
 		71719F9F1E33DC2100824A3D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 71719F9D1E33DC2100824A3D /* LaunchScreen.storyboard */; };
+		747756093336CB4C7712CF67 /* libPods-analytics-ios-mcvid_Example.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A6CF9A4095460036A398DC1 /* libPods-analytics-ios-mcvid_Example.a */; };
 		873B8AEB1B1F5CCA007FD442 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 873B8AEA1B1F5CCA007FD442 /* Main.storyboard */; };
-		922B59359918D26C262E53C9 /* libPods-analytics-ios-mcvid_Example.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2474F3174407F745559A0F75 /* libPods-analytics-ios-mcvid_Example.a */; };
 		EAB557B122C3E1C000C4F5F1 /* AdSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAB557B022C3E1C000C4F5F1 /* AdSupport.framework */; };
 /* End PBXBuildFile section */
 
@@ -40,10 +40,11 @@
 
 /* Begin PBXFileReference section */
 		067A5F01093BE1FE1292EAD0 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
-		2474F3174407F745559A0F75 /* libPods-analytics-ios-mcvid_Example.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-analytics-ios-mcvid_Example.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		0A03FCBB5D88BFF477F932C4 /* Pods-analytics-ios-mcvid_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-analytics-ios-mcvid_Example.release.xcconfig"; path = "Target Support Files/Pods-analytics-ios-mcvid_Example/Pods-analytics-ios-mcvid_Example.release.xcconfig"; sourceTree = "<group>"; };
+		324A59887B613AE03D43ECBB /* Pods-analytics-ios-mcvid_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-analytics-ios-mcvid_Example.debug.xcconfig"; path = "Target Support Files/Pods-analytics-ios-mcvid_Example/Pods-analytics-ios-mcvid_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		47FCDA3322F355AB0039DDD9 /* SEGMiddlewareSpy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SEGMiddlewareSpy.h; sourceTree = "<group>"; };
 		47FCDA3422F355AB0039DDD9 /* SEGMiddlewareSpy.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SEGMiddlewareSpy.m; sourceTree = "<group>"; };
-		520C4A3B439FC62966DD31E1 /* Pods-analytics-ios-mcvid_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-analytics-ios-mcvid_Example.release.xcconfig"; path = "Target Support Files/Pods-analytics-ios-mcvid_Example/Pods-analytics-ios-mcvid_Example.release.xcconfig"; sourceTree = "<group>"; };
+		4A6CF9A4095460036A398DC1 /* libPods-analytics-ios-mcvid_Example.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-analytics-ios-mcvid_Example.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6003F58A195388D20070C39A /* analytics-ios-mcvid_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "analytics-ios-mcvid_Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6003F58D195388D20070C39A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		6003F58F195388D20070C39A /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -65,12 +66,11 @@
 		606FC2411953D9B200FFA9A0 /* Tests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tests-Prefix.pch"; sourceTree = "<group>"; };
 		6E4DAB6C101D8BBD8D587DFA /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		71719F9E1E33DC2100824A3D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		78846B36CDBD9CC4742AF21D /* libPods-analytics-ios-mcvid_Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-analytics-ios-mcvid_Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		873B8AEA1B1F5CCA007FD442 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = Main.storyboard; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		A84CA801D283DB23A76F6CC3 /* libPods-analytics-ios-mcvid_Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-analytics-ios-mcvid_Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB05D6F4E7E787E7297C259E /* Pods-analytics-ios-mcvid_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-analytics-ios-mcvid_Tests.release.xcconfig"; path = "Target Support Files/Pods-analytics-ios-mcvid_Tests/Pods-analytics-ios-mcvid_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		AE747A19D9D86805DB95DE67 /* analytics-ios-mcvid.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = "analytics-ios-mcvid.podspec"; path = "../analytics-ios-mcvid.podspec"; sourceTree = "<group>"; };
-		AFB6F557167F66AB7EBFC830 /* Pods-analytics-ios-mcvid_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-analytics-ios-mcvid_Example.debug.xcconfig"; path = "Target Support Files/Pods-analytics-ios-mcvid_Example/Pods-analytics-ios-mcvid_Example.debug.xcconfig"; sourceTree = "<group>"; };
-		CB633B7FF4A751246F1ED787 /* Pods-analytics-ios-mcvid_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-analytics-ios-mcvid_Tests.release.xcconfig"; path = "Target Support Files/Pods-analytics-ios-mcvid_Tests/Pods-analytics-ios-mcvid_Tests.release.xcconfig"; sourceTree = "<group>"; };
-		E2933DAAC526B6976989BD92 /* Pods-analytics-ios-mcvid_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-analytics-ios-mcvid_Tests.debug.xcconfig"; path = "Target Support Files/Pods-analytics-ios-mcvid_Tests/Pods-analytics-ios-mcvid_Tests.debug.xcconfig"; sourceTree = "<group>"; };
+		D96E00956C17BA934FB1F9A3 /* Pods-analytics-ios-mcvid_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-analytics-ios-mcvid_Tests.debug.xcconfig"; path = "Target Support Files/Pods-analytics-ios-mcvid_Tests/Pods-analytics-ios-mcvid_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		EAB557B022C3E1C000C4F5F1 /* AdSupport.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AdSupport.framework; path = System/Library/Frameworks/AdSupport.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -83,7 +83,7 @@
 				6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */,
 				6003F592195388D20070C39A /* UIKit.framework in Frameworks */,
 				6003F58E195388D20070C39A /* Foundation.framework in Frameworks */,
-				922B59359918D26C262E53C9 /* libPods-analytics-ios-mcvid_Example.a in Frameworks */,
+				747756093336CB4C7712CF67 /* libPods-analytics-ios-mcvid_Example.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -94,20 +94,20 @@
 				6003F5B0195388D20070C39A /* XCTest.framework in Frameworks */,
 				6003F5B2195388D20070C39A /* UIKit.framework in Frameworks */,
 				6003F5B1195388D20070C39A /* Foundation.framework in Frameworks */,
-				45FE69EECD7939888D05F5AF /* libPods-analytics-ios-mcvid_Tests.a in Frameworks */,
+				150E034F5D234C5AE4BD74F3 /* libPods-analytics-ios-mcvid_Tests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		3D36ED84938BC209AB0124C1 /* Pods */ = {
+		34DFB373B5AE90572AFA92FB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				AFB6F557167F66AB7EBFC830 /* Pods-analytics-ios-mcvid_Example.debug.xcconfig */,
-				520C4A3B439FC62966DD31E1 /* Pods-analytics-ios-mcvid_Example.release.xcconfig */,
-				E2933DAAC526B6976989BD92 /* Pods-analytics-ios-mcvid_Tests.debug.xcconfig */,
-				CB633B7FF4A751246F1ED787 /* Pods-analytics-ios-mcvid_Tests.release.xcconfig */,
+				324A59887B613AE03D43ECBB /* Pods-analytics-ios-mcvid_Example.debug.xcconfig */,
+				0A03FCBB5D88BFF477F932C4 /* Pods-analytics-ios-mcvid_Example.release.xcconfig */,
+				D96E00956C17BA934FB1F9A3 /* Pods-analytics-ios-mcvid_Tests.debug.xcconfig */,
+				AB05D6F4E7E787E7297C259E /* Pods-analytics-ios-mcvid_Tests.release.xcconfig */,
 			);
 			name = Pods;
 			path = Pods;
@@ -121,7 +121,7 @@
 				6003F5B5195388D20070C39A /* Tests */,
 				6003F58C195388D20070C39A /* Frameworks */,
 				6003F58B195388D20070C39A /* Products */,
-				3D36ED84938BC209AB0124C1 /* Pods */,
+				34DFB373B5AE90572AFA92FB /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -142,8 +142,8 @@
 				6003F58F195388D20070C39A /* CoreGraphics.framework */,
 				6003F591195388D20070C39A /* UIKit.framework */,
 				6003F5AF195388D20070C39A /* XCTest.framework */,
-				2474F3174407F745559A0F75 /* libPods-analytics-ios-mcvid_Example.a */,
-				A84CA801D283DB23A76F6CC3 /* libPods-analytics-ios-mcvid_Tests.a */,
+				4A6CF9A4095460036A398DC1 /* libPods-analytics-ios-mcvid_Example.a */,
+				78846B36CDBD9CC4742AF21D /* libPods-analytics-ios-mcvid_Tests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -213,7 +213,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6003F5BF195388D20070C39A /* Build configuration list for PBXNativeTarget "analytics-ios-mcvid_Example" */;
 			buildPhases = (
-				B1D8C8EF2294BA261E67F53F /* [CP] Check Pods Manifest.lock */,
+				9574AAAD771B1F1A3C1249E4 /* [CP] Check Pods Manifest.lock */,
 				6003F586195388D20070C39A /* Sources */,
 				6003F587195388D20070C39A /* Frameworks */,
 				6003F588195388D20070C39A /* Resources */,
@@ -231,7 +231,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6003F5C2195388D20070C39A /* Build configuration list for PBXNativeTarget "analytics-ios-mcvid_Tests" */;
 			buildPhases = (
-				C7D6250BE2DB33C13404DF3D /* [CP] Check Pods Manifest.lock */,
+				474118ACAD1FA75F09AC66D1 /* [CP] Check Pods Manifest.lock */,
 				6003F5AA195388D20070C39A /* Sources */,
 				6003F5AB195388D20070C39A /* Frameworks */,
 				6003F5AC195388D20070C39A /* Resources */,
@@ -304,29 +304,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		B1D8C8EF2294BA261E67F53F /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-analytics-ios-mcvid_Example-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		C7D6250BE2DB33C13404DF3D /* [CP] Check Pods Manifest.lock */ = {
+		474118ACAD1FA75F09AC66D1 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -342,6 +320,28 @@
 			);
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/Pods-analytics-ios-mcvid_Tests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		9574AAAD771B1F1A3C1249E4 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-analytics-ios-mcvid_Example-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -511,7 +511,7 @@
 		};
 		6003F5C0195388D20070C39A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = AFB6F557167F66AB7EBFC830 /* Pods-analytics-ios-mcvid_Example.debug.xcconfig */;
+			baseConfigurationReference = 324A59887B613AE03D43ECBB /* Pods-analytics-ios-mcvid_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -526,7 +526,7 @@
 		};
 		6003F5C1195388D20070C39A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 520C4A3B439FC62966DD31E1 /* Pods-analytics-ios-mcvid_Example.release.xcconfig */;
+			baseConfigurationReference = 0A03FCBB5D88BFF477F932C4 /* Pods-analytics-ios-mcvid_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -541,7 +541,7 @@
 		};
 		6003F5C3195388D20070C39A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E2933DAAC526B6976989BD92 /* Pods-analytics-ios-mcvid_Tests.debug.xcconfig */;
+			baseConfigurationReference = D96E00956C17BA934FB1F9A3 /* Pods-analytics-ios-mcvid_Tests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -565,7 +565,7 @@
 		};
 		6003F5C4195388D20070C39A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CB633B7FF4A751246F1ED787 /* Pods-analytics-ios-mcvid_Tests.release.xcconfig */;
+			baseConfigurationReference = AB05D6F4E7E787E7297C259E /* Pods-analytics-ios-mcvid_Tests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (

@@ -28,8 +28,8 @@ Analytics-ios-mcvid requests the marketingCloudId from Adobe and appends it to i
   s.social_media_url = 'https://twitter.com/SegmentEng'
 
   s.ios.deployment_target = '10.0'
-
-  s.source_files = 'AnalyticsMVCID/Classes/**/*'
+  s.static_framework = true
+  s.source_files = 'AnalyticsMVCID/Classes/**/*.{h,m}'
 
   s.dependency 'Analytics'
 end
