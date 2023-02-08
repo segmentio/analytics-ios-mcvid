@@ -29,7 +29,9 @@ Analytics-ios-mcvid requests the marketingCloudId from Adobe and appends it to i
 
   s.ios.deployment_target = '10.0'
   s.static_framework = true
-  s.source_files = 'AnalyticsMVCID/Classes/**/*.{h,m}'
-
+  s.source_files = [
+    'AnalyticsMVCID/include/**/*.{h,m}',
+    'AnalyticsMVCID/Classes/**/*.{h,m}'
+  ]
   s.dependency 'Analytics'
 end

@@ -4,11 +4,14 @@
 #import <Analytics/SEGAnalyticsUtils.h>
 #import <Analytics/SEGState.h>
 #import <Analytics/SEGAnalyticsConfiguration.h>
+#elif SWIFT_PACKAGE
+@import Segment;
 #else
 #import <Segment/SEGAnalyticsUtils.h>
 #import <Segment/SEGState.h>
 #import <Segment/SEGAnalyticsConfiguration.h>
 #endif
+
 
 #import <AdSupport/ASIdentifierManager.h>
 

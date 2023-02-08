@@ -2,9 +2,6 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
 
-//See how ObjC sorces are declared in here for reference
-https://github.com/segmentio/analytics-ios/blob/master/Package.swift
-
 let package = Package(
     name: "analytics-ios-mcvid",
     platforms: [
