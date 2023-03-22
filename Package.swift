@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.7
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
 
@@ -17,16 +17,14 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(
-            name: "Segment",
-            url: "https://github.com/segmentio/analytics-ios.git",
-            from: "4.1.7"
-        )
+        .package(url: "https://github.com/sch-devios/analytics-ios", branch: "master")
     ],
     targets: [
         .target(
             name: "analytics-ios-mcvid",
-            dependencies: ["Segment"],
+            dependencies: [
+                .product(name: "Segment", package: "analytics-ios")
+            ],
             path: "AnalyticsMVCID"
         ),
     ]
