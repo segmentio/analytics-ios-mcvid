@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sch-devios/analytics-ios",
       "state" : {
-        "branch" : "master",
-        "revision" : "ea6743ef4d72f78aa581800a447c42936ca016e8"
+        "revision" : "ea6743ef4d72f78aa581800a447c42936ca016e8",
+        "version" : "4.2.0"
       }
     }
   ],

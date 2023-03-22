@@ -17,7 +17,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/sch-devios/analytics-ios", branch: "master")
+        .package(url: "https://github.com/sch-devios/analytics-ios", from: "4.2.0")
     ],
     targets: [
         .target(
