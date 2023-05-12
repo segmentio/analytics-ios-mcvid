@@ -69,7 +69,7 @@
 		78846B36CDBD9CC4742AF21D /* libPods-analytics-ios-mcvid_Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-analytics-ios-mcvid_Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		873B8AEA1B1F5CCA007FD442 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = Main.storyboard; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		AB05D6F4E7E787E7297C259E /* Pods-analytics-ios-mcvid_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-analytics-ios-mcvid_Tests.release.xcconfig"; path = "Target Support Files/Pods-analytics-ios-mcvid_Tests/Pods-analytics-ios-mcvid_Tests.release.xcconfig"; sourceTree = "<group>"; };
-		AE747A19D9D86805DB95DE67 /* analytics-ios-mcvid.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = "analytics-ios-mcvid.podspec"; path = "../analytics-ios-mcvid.podspec"; sourceTree = "<group>"; };
+		AE747A19D9D86805DB95DE67 /* analytics-ios-mcvid.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = "analytics-ios-mcvid.podspec"; path = "../analytics-ios-mcvid.podspec"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		D96E00956C17BA934FB1F9A3 /* Pods-analytics-ios-mcvid_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-analytics-ios-mcvid_Tests.debug.xcconfig"; path = "Target Support Files/Pods-analytics-ios-mcvid_Tests/Pods-analytics-ios-mcvid_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		EAB557B022C3E1C000C4F5F1 /* AdSupport.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AdSupport.framework; path = System/Library/Frameworks/AdSupport.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -109,7 +109,6 @@
 				D96E00956C17BA934FB1F9A3 /* Pods-analytics-ios-mcvid_Tests.debug.xcconfig */,
 				AB05D6F4E7E787E7297C259E /* Pods-analytics-ios-mcvid_Tests.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
