@@ -36,3 +36,6 @@ Carthage
 #
 Pods/
 example/Pods/
+
+#SPM
+.swiftpm/

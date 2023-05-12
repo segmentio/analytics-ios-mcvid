@@ -3,6 +3,8 @@
 #if defined(__has_include) && __has_include(<Analytics/SEGAnalytics.h>)
 #import <Analytics/SEGMiddleware.h>
 #import <Analytics/SEGAnalyticsConfiguration.h>
+#elif SWIFT_PACKAGE
+@import Segment;
 #else
 #import <Segment/SEGMiddleware.h>
 #import <Segment/SEGAnalyticsConfiguration.h>
